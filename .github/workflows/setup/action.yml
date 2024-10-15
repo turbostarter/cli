@@ -1,0 +1,33 @@
+name: "CI / Setup"
+description: "Common setup steps for Github Actions"
+
+inputs:
+  node-version:
+    description: "Node.js version"
+    required: true
+    default: "20.x"
+  install-packages:
+    description: "Install packages"
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: ✅ Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🎬 Setup pnpm
+      uses: pnpm/action-setup@v4
+
+    - name: 🔨 Setup Node.js ${{ inputs.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: "pnpm"
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: 🔌 Install
+      if: ${{ inputs.install-packages == 'true' }}
+      shell: bash
+      run: pnpm install

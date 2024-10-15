@@ -1,0 +1,37 @@
+name: CI / Tests
+
+on:
+  pull_request:
+    branches: ["*"]
+  merge_group:
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 20.x
+
+jobs:
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: ✅ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔨 Setup
+        uses: ./.github/workflows/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🖌️ Format
+        run: pnpm run format
+
+      - name: 🛻 Lint
+        run: pnpm run lint
+
+      - name: 🧪 Typecheck
+        run: pnpm run typecheck
