@@ -1,6 +1,6 @@
 {
   "name": "@turbostarter/cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "index.js",
   "type": "module",
   "exports": "./dist/index.js",
@@ -26,25 +26,33 @@
     "prepare": "pnpm run build",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
+    "format:fix": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache"
   },
   "author": "Bartosz Zagrodzki",
   "license": "ISC",
   "description": "A CLI for TurboStarter",
   "devDependencies": {
     "@eslint/compat": "1.2.0",
+    "@types/prompts": "^2.4.2",
+    "@types/fs-extra": "^11.0.1",
     "@types/node": "22.7.5",
     "eslint": "9.12.0",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-unused-imports": "4.1.4",
     "prettier": "3.3.3",
     "tsup": "8.3.0",
+    "type-fest": "^3.8.0",
     "typescript": "5.5.4",
     "typescript-eslint": "8.9.0"
   },
   "dependencies": {
-    "@clack/prompts": "0.7.0",
+    "commander": "12.1.0",
+    "execa": "9.4.0",
+    "fs-extra": "^11.1.0",
+    "ora": "^6.1.2",
+    "picocolors": "1.1.0",
+    "prompts": "^2.4.2",
     "zod": "3.23.8"
   },
   "packageManager": "pnpm@9.9.0"

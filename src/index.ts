@@ -1,10 +1,28 @@
 #!/usr/bin/env node
-import { intro, outro } from "@clack/prompts";
+import { Command } from "commander";
+
+import { newCommand } from "~/commands/new.command";
+import { getPackageInfo } from "~/utils";
 
 process.on("SIGINT", () => process.exit(0));
 process.on("SIGTERM", () => process.exit(0));
 
-console.log("Hello World");
+function main() {
+  const packageInfo = getPackageInfo();
 
-intro(`turbostarter`);
-outro(`You're all set!`);
+  const program = new Command()
+    .name("turbostarter")
+    .description(
+      "Your Turbo Assistant for starting new projects, adding plugins and more.",
+    )
+    .version(
+      packageInfo.version ?? "1.0.0",
+      "-v, --version",
+      "display the version number",
+    );
+
+  program.addCommand(newCommand);
+  program.parse();
+}
+
+void main();
