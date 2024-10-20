@@ -8,7 +8,7 @@ import { logger } from "~/utils";
 
 export const prepareEnvironment = async (name: string) => {
   try {
-    await Promise.all(
+    await Promise.allSettled(
       Object.values(EnvPath).map(async (path) => {
         const cwd = join(process.cwd(), name, path);
         await promises.copyFile(
@@ -28,29 +28,31 @@ export const setEnvironmentVariable = async (
   key: string,
   value: string,
 ) => {
+  if (!value) {
+    return;
+  }
+
   const paths = _.keys(
     _.pickBy(envInPaths, (values) => _.includes(values, key)),
   );
 
-  await Promise.all(
-    paths.map(async (path) => {
-      const cwd = join(process.cwd(), name, path);
-      const envFilePath = join(cwd, EnvFile.LOCAL);
+  for (const path of paths) {
+    const cwd = join(process.cwd(), name, path);
+    const envFilePath = join(cwd, EnvFile.LOCAL);
 
-      const content = await promises.readFile(envFilePath, "utf8");
+    const content = await promises.readFile(envFilePath, "utf8");
 
-      const regex = new RegExp(`^${key}=.*`, "gm");
+    const regex = new RegExp(`^${key}=.*`, "gm");
 
-      if (regex.test(content)) {
-        await promises.writeFile(
-          envFilePath,
-          content.replace(regex, `${key}="${value}"`),
-        );
-      } else {
-        await promises.appendFile(envFilePath, `\n${key}="${value}"`);
-      }
-    }),
-  );
+    if (regex.test(content)) {
+      await promises.writeFile(
+        envFilePath,
+        content.replace(regex, `${key}="${value}"`),
+      );
+    } else {
+      await promises.appendFile(envFilePath, `\n${key}="${value}"`);
+    }
+  }
 };
 
 export const setEnvironmentVariables = async (
@@ -60,11 +62,9 @@ export const setEnvironmentVariables = async (
   const spinner = ora(`Setting environment variables...`).start();
 
   try {
-    await Promise.all(
-      Object.entries(variables).map(([key, value]) =>
-        setEnvironmentVariable(name, key, value),
-      ),
-    );
+    for (const [key, value] of Object.entries(variables)) {
+      await setEnvironmentVariable(name, key, value);
+    }
 
     spinner.succeed("Environment variables successfully set!");
   } catch {

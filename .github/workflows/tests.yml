@@ -1,7 +1,7 @@
 name: CI / Tests
 
 on:
-  pull_request:
+  push:
     branches: ["*"]
   merge_group:
   workflow_dispatch:

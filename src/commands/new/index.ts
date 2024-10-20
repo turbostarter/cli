@@ -5,7 +5,15 @@ import { join } from "path";
 import color from "picocolors";
 import prompts from "prompts";
 
-import { App, config } from "~/config";
+import { getBillingConfig } from "~/commands/new/config/billing";
+import { getEmailConfig } from "~/commands/new/config/email";
+import {
+  prepareEnvironment,
+  setEnvironmentVariables,
+} from "~/commands/new/config/env";
+import { getSupabaseConfig } from "~/commands/new/config/supabase";
+import { startSupabase } from "~/commands/new/supabase";
+import { App, appSpecificFiles, config, SupabaseType } from "~/config";
 import { logger, onCancel } from "~/utils";
 
 import { validatePrerequisites } from "./prerequisites";
@@ -49,22 +57,24 @@ export const newCommand = new Command()
       },
     );
 
-    // const supabaseConfig = await getSupabaseConfig();
-    // const billingConfig = await getBillingConfig();
-    // const emailConfig = await getEmailConfig();
+    const supabaseConfig = await getSupabaseConfig();
+    const billingConfig = await getBillingConfig();
+    const emailConfig = await getEmailConfig();
 
-    // const env = {
-    //   ...("env" in supabaseConfig ? supabaseConfig.env : {}),
-    //   ...billingConfig,
-    //   ...emailConfig,
-    // };
+    const config = {
+      ...("env" in supabaseConfig ? supabaseConfig.env : {}),
+      ...billingConfig,
+      ...emailConfig,
+    };
 
-    // await prepareEnvironment(global.name);
-    // await setEnvironmentVariables(global.name, env);
+    await cloneRepository(global.name, global.apps);
+    await prepareEnvironment(global.name);
+    await setEnvironmentVariables(global.name, config);
+    await installDependencies(global.name);
 
-    await cloneRepository(global.name);
-    // await installDependencies(response.name);
-    // await startSupabase(response.name);
+    if (supabaseConfig.type === SupabaseType.LOCAL) {
+      await startSupabase(global.name);
+    }
 
     logger.log(
       `\n🎉 You can now get started. Open the project and just ship it! 🎉\n`,
@@ -75,22 +85,25 @@ export const newCommand = new Command()
     );
   });
 
-const cloneRepository = async (name: string) => {
+const cloneRepository = async (name: string, apps: App[]) => {
   const spinner = ora(`Cloning repository into ${name}...`).start();
   const cwd = join(process.cwd(), name);
 
+  const filesToRemove = Object.values(App)
+    .filter((app) => !apps.includes(app))
+    .map((app) => appSpecificFiles[app])
+    .flat();
+
   try {
-    await execa("git", ["clone", "--no-checkout", config.repository, name]);
-    await execa("git", ["sparse-checkout", "init", "--no-cone"], {
-      cwd,
-    });
-    await execa("git", ["sparse-checkout", "set", `'/*'`, `'!/apps/mobile/*'`]);
-    await execa("git", ["checkout"], { cwd });
+    await execa("git", ["clone", config.repository, name]);
+
+    if (filesToRemove.length) {
+      await execa("rm", ["-rf", ...filesToRemove], { cwd });
+    }
 
     spinner.succeed("Repository successfully pulled!");
-  } catch (error) {
-    console.error(error);
-    spinner.fail("Failed to clone TurboStarter!");
+  } catch {
+    spinner.fail("Failed to clone TurboStarter! Please try again.");
     process.exit(1);
   }
 };
@@ -104,7 +117,7 @@ const installDependencies = async (name: string) => {
 
     spinner.succeed("Dependencies successfully installed!");
   } catch {
-    spinner.fail("Failed to install dependencies!");
+    spinner.fail("Failed to install dependencies! Please try again.");
     process.exit(1);
   }
 };

@@ -105,6 +105,21 @@ export const envInPaths = {
   ],
 };
 
+export const appSpecificFiles = {
+  [App.WEB]: [],
+  [App.MOBILE]: [
+    "apps/mobile",
+    "packages/ui/mobile",
+    "packages/analytics/mobile",
+    ".github/workflows/publish-mobile.yml",
+  ],
+  [App.EXTENSION]: [
+    "apps/extension",
+    "packages/analytics/extension",
+    ".github/workflows/publish-extension.yml",
+  ],
+};
+
 export const config = {
   name: "TurboStarter",
   repository: "https://github.com/turbostarter/main.git",
