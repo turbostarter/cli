@@ -8,7 +8,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   includeIgnoreFile(
-    path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".gitignore"),
+    path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".gitignore")
   ),
   { ignores: ["**/*.config.*"] },
   {
@@ -90,5 +90,5 @@ export default tseslint.config(
   {
     linterOptions: { reportUnusedDisableDirectives: true },
     languageOptions: { parserOptions: { projectService: true } },
-  },
+  }
 );

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 
-import { newCommand } from "~/commands/new.command";
+import { newCommand } from "~/commands/new";
 import { getPackageInfo } from "~/utils";
 
 process.on("SIGINT", () => process.exit(0));
