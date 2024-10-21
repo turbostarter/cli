@@ -1,6 +1,5 @@
 import { execa } from "execa";
 import ora from "ora";
-import { join } from "path";
 
 import { setEnvironmentVariable } from "~/commands/new/config/env";
 import { validateDockerInstalled } from "~/commands/new/prerequisites";
@@ -10,10 +9,9 @@ const getSupabaseKey = (out: string) => {
   return /anon key:\s([^\s]+)/.exec(out)?.[1];
 };
 
-export const startSupabase = async (name: string) => {
+export const startSupabase = async (cwd: string) => {
   await validateDockerInstalled();
 
-  const cwd = join(process.cwd(), name);
   const spinner = ora(`Starting Supabase...`).start();
 
   try {
@@ -21,7 +19,7 @@ export const startSupabase = async (name: string) => {
     const key = getSupabaseKey(out.stdout);
 
     if (key) {
-      await setEnvironmentVariable(name, config.env.supabase.key, key);
+      await setEnvironmentVariable(cwd, config.env.supabase.key, key);
     }
 
     spinner.succeed("Supabase successfully started!");

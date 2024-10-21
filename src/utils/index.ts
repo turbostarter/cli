@@ -22,7 +22,7 @@ export const getLabel = (value: string) => {
 export const onCancel = () => {
   logger.break();
   logger.error("Operation cancelled.");
-  process.exit(1);
+  process.exit(0);
 };
 
 export * from "./handle-error";

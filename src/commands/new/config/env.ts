@@ -6,11 +6,11 @@ import { join } from "path";
 import { EnvFile, envInPaths, EnvPath } from "~/config";
 import { logger } from "~/utils";
 
-export const prepareEnvironment = async (name: string) => {
+export const prepareEnvironment = async (projectDir: string) => {
   try {
     await Promise.allSettled(
       Object.values(EnvPath).map(async (path) => {
-        const cwd = join(process.cwd(), name, path);
+        const cwd = join(projectDir, path);
         await promises.copyFile(
           join(cwd, EnvFile.EXAMPLE),
           join(cwd, EnvFile.LOCAL),
@@ -24,7 +24,7 @@ export const prepareEnvironment = async (name: string) => {
 };
 
 export const setEnvironmentVariable = async (
-  name: string,
+  projectDir: string,
   key: string,
   value: string,
 ) => {
@@ -37,7 +37,7 @@ export const setEnvironmentVariable = async (
   );
 
   for (const path of paths) {
-    const cwd = join(process.cwd(), name, path);
+    const cwd = join(projectDir, path);
     const envFilePath = join(cwd, EnvFile.LOCAL);
 
     const content = await promises.readFile(envFilePath, "utf8");
@@ -56,14 +56,14 @@ export const setEnvironmentVariable = async (
 };
 
 export const setEnvironmentVariables = async (
-  name: string,
+  projectDir: string,
   variables: Record<string, string>,
 ) => {
   const spinner = ora(`Setting environment variables...`).start();
 
   try {
     for (const [key, value] of Object.entries(variables)) {
-      await setEnvironmentVariable(name, key, value);
+      await setEnvironmentVariable(projectDir, key, value);
     }
 
     spinner.succeed("Environment variables successfully set!");

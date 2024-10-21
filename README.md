@@ -6,7 +6,7 @@ Your TurboStarter assistant for starting new projects, adding plugins and more.
 
 You can run commands using `npx`:
 
-```bash
+```
 npx turbostarter <command>
 ```
 
@@ -16,7 +16,7 @@ This ensures that you always run the latest version of the CLI.
 
 Running the CLI without any arguments will display the general information about the CLI:
 
-```bash
+```
 Usage: turbostarter [options] [command]
 
 Your Turbo Assistant for starting new projects, adding plugins and more.
@@ -34,7 +34,7 @@ Commands:
 
 To create a new TurboStarter project, run the following command:
 
-```bash
+```
 npx turbostarter new
 ```
 
