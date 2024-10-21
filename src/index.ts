@@ -13,7 +13,7 @@ function main() {
   const program = new Command()
     .name("turbostarter")
     .description(
-      "Your Turbo Assistant for starting new projects, adding plugins and more.",
+      "Your TurboStarter assistant for starting new projects, adding plugins and more.",
     )
     .version(
       packageInfo.version ?? "1.0.0",

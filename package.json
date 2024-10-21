@@ -1,6 +1,6 @@
 {
   "name": "@turbostarter/cli",
-  "version": "0.0.4",
+  "version": "1.0.1",
   "main": "index.js",
   "type": "module",
   "exports": "./dist/index.js",
@@ -17,6 +17,15 @@
   "homepage": "https://turbostarter.dev",
   "files": [
     "dist"
+  ],
+  "keywords": [
+    "turbostarter",
+    "cli",
+    "starter kit",
+    "template",
+    "web",
+    "mobile",
+    "browser extension"
   ],
   "scripts": {
     "start": "node dist/index.js",
