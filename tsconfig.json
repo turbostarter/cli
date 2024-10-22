@@ -15,6 +15,7 @@
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
+    "resolveJsonModule": true,
     "paths": {
       "~/*": ["./src/*"]
     }

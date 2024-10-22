@@ -103,6 +103,7 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
     global.name,
     global.apps,
   );
+  await configureGit(projectDir);
   await prepareEnvironment(projectDir);
   await setEnvironmentVariables(projectDir, config);
   await installDependencies(projectDir);
@@ -133,6 +134,25 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
     return projectDir;
   } catch {
     spinner.fail("Failed to clone TurboStarter! Please try again.");
+    process.exit(1);
+  }
+};
+
+const configureGit = async (cwd: string) => {
+  const spinner = ora(`Configuring Git...`).start();
+
+  try {
+    await execa("rm", ["-rf", ".git"], { cwd });
+    await execa("git", ["init"], { cwd });
+    await execa("git", ["remote", "add", "upstream", config.repository], {
+      cwd,
+    });
+    await execa("git", ["add", "."], { cwd });
+    await execa("git", ["commit", "-m", "Initial commit"], { cwd });
+
+    spinner.succeed("Git successfully configured!");
+  } catch {
+    spinner.fail("Failed to configure Git! Please try again.");
     process.exit(1);
   }
 };
