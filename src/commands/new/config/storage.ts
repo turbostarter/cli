@@ -1,0 +1,63 @@
+import prompts from "prompts";
+
+import { config, StorageProvider } from "~/config";
+import { onCancel } from "~/utils";
+import { getLabel } from "~/utils";
+
+const getStorageProvider = async (): Promise<{
+  [key in typeof config.env.storage.provider]: StorageProvider;
+}> => {
+  return prompts(
+    [
+      {
+        type: "select",
+        choices: Object.values(StorageProvider).map((provider) => ({
+          title: getLabel(provider),
+          value: provider,
+        })),
+        name: config.env.storage.provider,
+        message: "What do you want to use for storage?",
+      },
+    ],
+    {
+      onCancel,
+    },
+  );
+};
+
+const getStorageProviderConfig = () => {
+  return prompts(
+    [
+      {
+        type: "text",
+        name: config.env.storage.s3.region,
+        message: "Enter your S3 region",
+      },
+      {
+        type: "text",
+        name: config.env.storage.s3.endpoint,
+        message: "Enter your S3 endpoint",
+      },
+      {
+        type: "text",
+        name: config.env.storage.s3.accessKeyId,
+        message: "Enter your S3 access key ID",
+      },
+      {
+        type: "text",
+        name: config.env.storage.s3.secretAccessKey,
+        message: "Enter your S3 secret access key",
+      },
+    ],
+    {
+      onCancel,
+    },
+  );
+};
+
+export const getStorageConfig = async () => {
+  const provider = await getStorageProvider();
+  const config = await getStorageProviderConfig();
+
+  return { ...provider, ...config };
+};

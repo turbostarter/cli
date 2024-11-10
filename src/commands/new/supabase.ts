@@ -1,12 +1,38 @@
 import { execa } from "execa";
 import ora from "ora";
 
-import { setEnvironmentVariable } from "~/commands/new/config/env";
+import { setEnvironmentVariables } from "~/commands/new/config/env";
 import { validateDockerInstalled } from "~/commands/new/prerequisites";
 import { config } from "~/config";
 
-const getSupabaseKey = (out: string) => {
-  return /anon key:\s([^\s]+)/.exec(out)?.[1];
+const variables = [
+  {
+    variable: config.env.supabase.key,
+    regex: /anon key:\s([^\s]+)/,
+  },
+  {
+    variable: config.env.storage.s3.region,
+    regex: /S3 Region:\s([^\s]+)/,
+  },
+  {
+    variable: config.env.storage.s3.endpoint,
+    regex: /S3 Storage URL:\s([^\s]+)/,
+  },
+  {
+    variable: config.env.storage.s3.accessKeyId,
+    regex: /S3 Access Key:\s([^\s]+)/,
+  },
+  {
+    variable: config.env.storage.s3.secretAccessKey,
+    regex: /S3 Secret Key:\s([^\s]+)/,
+  },
+];
+
+const getVariablesFromOutput = (out: string) => {
+  return variables.reduce((acc, variable) => {
+    const match = variable.regex.exec(out);
+    return match ? { ...acc, [variable.variable]: match[1] } : acc;
+  }, {}) as Record<string, string>;
 };
 
 export const startSupabase = async (cwd: string) => {
@@ -16,11 +42,9 @@ export const startSupabase = async (cwd: string) => {
 
   try {
     const out = await execa("pnpm", ["db:setup"], { cwd });
-    const key = getSupabaseKey(out.stdout);
+    const variables = getVariablesFromOutput(out.stdout);
 
-    if (key) {
-      await setEnvironmentVariable(cwd, config.env.supabase.key, key);
-    }
+    await setEnvironmentVariables(cwd, variables);
 
     spinner.succeed("Supabase successfully started!");
   } catch {

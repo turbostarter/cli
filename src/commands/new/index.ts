@@ -12,6 +12,7 @@ import {
   prepareEnvironment,
   setEnvironmentVariables,
 } from "~/commands/new/config/env";
+import { getStorageConfig } from "~/commands/new/config/storage";
 import { getSupabaseConfig } from "~/commands/new/config/supabase";
 import { startSupabase } from "~/commands/new/supabase";
 import { App, appSpecificFiles, config, SupabaseType } from "~/config";
@@ -91,11 +92,14 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   const supabaseConfig = await getSupabaseConfig();
   const billingConfig = await getBillingConfig();
   const emailConfig = await getEmailConfig();
+  const storageConfig =
+    supabaseConfig.type === SupabaseType.LOCAL ? {} : await getStorageConfig();
 
   const config = {
     ...("env" in supabaseConfig ? supabaseConfig.env : {}),
     ...billingConfig,
     ...emailConfig,
+    ...storageConfig,
   };
 
   const projectDir = await cloneRepository(

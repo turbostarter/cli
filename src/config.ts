@@ -3,6 +3,10 @@ export const SupabaseType = {
   CLOUD: "cloud",
 } as const;
 
+export const StorageProvider = {
+  S3: "s3",
+} as const;
+
 export const BillingProvider = {
   STRIPE: "stripe",
   LEMON_SQUEEZY: "lemon-squeezy",
@@ -36,6 +40,8 @@ export const App = {
 } as const;
 
 export type SupabaseType = (typeof SupabaseType)[keyof typeof SupabaseType];
+export type StorageProvider =
+  (typeof StorageProvider)[keyof typeof StorageProvider];
 export type BillingProvider =
   (typeof BillingProvider)[keyof typeof BillingProvider];
 export type EmailProvider = (typeof EmailProvider)[keyof typeof EmailProvider];
@@ -84,6 +90,15 @@ const env = {
       port: "NODEMAILER_PORT",
     },
   },
+  storage: {
+    provider: "STORAGE_PROVIDER",
+    s3: {
+      region: "S3_REGION",
+      endpoint: "S3_ENDPOINT",
+      accessKeyId: "S3_ACCESS_KEY_ID",
+      secretAccessKey: "S3_SECRET_ACCESS_KEY",
+    },
+  },
 } as const;
 
 export const envInPaths = {
@@ -102,6 +117,11 @@ export const envInPaths = {
     env.email.postmark.apiKey,
     env.email.nodemailer.user,
     env.email.nodemailer.password,
+    env.storage.provider,
+    env.storage.s3.region,
+    env.storage.s3.endpoint,
+    env.storage.s3.accessKeyId,
+    env.storage.s3.secretAccessKey,
   ],
 };
 
