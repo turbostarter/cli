@@ -38,7 +38,7 @@ To create a new TurboStarter project, run the following command:
 npx turbostarter new
 ```
 
-The CLI will ask you a few questions about the project (e.g. name, supabase, billing etc.) and then create a new project in the working directory.
+The CLI will ask you a few questions about the project (e.g. name, database, billing etc.) and then create a new project in the working directory.
 
 The command will also install all dependencies and run the project setup scripts.
 

@@ -7,15 +7,15 @@ import prompts from "prompts";
 import { z } from "zod";
 
 import { getBillingConfig } from "~/commands/new/config/billing";
+import { getDatabaseConfig } from "~/commands/new/config/db";
 import { getEmailConfig } from "~/commands/new/config/email";
 import {
   prepareEnvironment,
   setEnvironmentVariables,
 } from "~/commands/new/config/env";
 import { getStorageConfig } from "~/commands/new/config/storage";
-import { getSupabaseConfig } from "~/commands/new/config/supabase";
-import { startSupabase } from "~/commands/new/supabase";
-import { App, appSpecificFiles, config, SupabaseType } from "~/config";
+import { startDatabase } from "~/commands/new/db";
+import { App, appSpecificFiles, config, DatabaseType } from "~/config";
 import { handleError, logger, onCancel } from "~/utils";
 
 import { validatePrerequisites } from "./prerequisites";
@@ -89,14 +89,13 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
     },
   );
 
-  const supabaseConfig = await getSupabaseConfig();
+  const dbConfig = await getDatabaseConfig();
   const billingConfig = await getBillingConfig();
   const emailConfig = await getEmailConfig();
-  const storageConfig =
-    supabaseConfig.type === SupabaseType.LOCAL ? {} : await getStorageConfig();
+  const storageConfig = await getStorageConfig();
 
   const config = {
-    ...("env" in supabaseConfig ? supabaseConfig.env : {}),
+    ...("env" in dbConfig ? dbConfig.env : {}),
     ...billingConfig,
     ...emailConfig,
     ...storageConfig,
@@ -112,8 +111,8 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   await setEnvironmentVariables(projectDir, config);
   await installDependencies(projectDir);
 
-  if (supabaseConfig.type === SupabaseType.LOCAL) {
-    await startSupabase(projectDir);
+  if (dbConfig.type === DatabaseType.LOCAL) {
+    await startDatabase(projectDir);
   }
 };
 
@@ -127,14 +126,17 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
     .flat();
 
   try {
-    await execa("git", ["clone", config.repository, name], { cwd });
+    await execa(
+      "git",
+      ["clone", "-b", "main", "--single-branch", config.repository, name],
+      { cwd },
+    );
 
     if (filesToRemove.length) {
       await execa("rm", ["-rf", ...filesToRemove], { cwd: projectDir });
     }
 
     spinner.succeed("Repository successfully pulled!");
-
     return projectDir;
   } catch {
     spinner.fail("Failed to clone TurboStarter! Please try again.");

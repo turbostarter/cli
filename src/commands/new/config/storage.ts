@@ -32,11 +32,18 @@ const getStorageProviderConfig = () => {
         type: "text",
         name: config.env.storage.s3.region,
         message: "Enter your S3 region",
+        initial: "us-east-1",
       },
       {
         type: "text",
         name: config.env.storage.s3.endpoint,
         message: "Enter your S3 endpoint",
+        initial: "https://s3.amazonaws.com",
+      },
+      {
+        type: "text",
+        name: config.env.storage.s3.bucket,
+        message: "Enter your default S3 bucket name",
       },
       {
         type: "text",

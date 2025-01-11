@@ -1,4 +1,4 @@
-export const SupabaseType = {
+export const DatabaseType = {
   LOCAL: "local",
   CLOUD: "cloud",
 } as const;
@@ -25,7 +25,6 @@ export const EnvPath = {
   WEB: "./apps/web",
   MOBILE: "./apps/mobile",
   EXTENSION: "./apps/extension",
-  DB: "./packages/db",
 } as const;
 
 export const EnvFile = {
@@ -39,7 +38,7 @@ export const App = {
   EXTENSION: "extension",
 } as const;
 
-export type SupabaseType = (typeof SupabaseType)[keyof typeof SupabaseType];
+export type DatabaseType = (typeof DatabaseType)[keyof typeof DatabaseType];
 export type StorageProvider =
   (typeof StorageProvider)[keyof typeof StorageProvider];
 export type BillingProvider =
@@ -52,10 +51,6 @@ export type App = (typeof App)[keyof typeof App];
 const env = {
   db: {
     url: "DATABASE_URL",
-  },
-  supabase: {
-    key: "SUPABASE_ANON_KEY",
-    url: "SUPABASE_URL",
   },
   billing: {
     provider: "BILLING_PROVIDER",
@@ -94,6 +89,7 @@ const env = {
     provider: "STORAGE_PROVIDER",
     s3: {
       region: "S3_REGION",
+      bucket: "S3_BUCKET",
       endpoint: "S3_ENDPOINT",
       accessKeyId: "S3_ACCESS_KEY_ID",
       secretAccessKey: "S3_SECRET_ACCESS_KEY",
@@ -102,7 +98,7 @@ const env = {
 } as const;
 
 export const envInPaths = {
-  [EnvPath.ROOT]: [env.db.url, env.supabase.key, env.supabase.url],
+  [EnvPath.ROOT]: [env.db.url],
   [EnvPath.WEB]: [
     env.billing.provider,
     env.billing.stripe.secretKey,
@@ -118,8 +114,6 @@ export const envInPaths = {
     env.email.nodemailer.user,
     env.email.nodemailer.password,
     env.storage.provider,
-    env.storage.s3.region,
-    env.storage.s3.endpoint,
     env.storage.s3.accessKeyId,
     env.storage.s3.secretAccessKey,
   ],
