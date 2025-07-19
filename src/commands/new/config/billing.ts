@@ -67,6 +67,29 @@ const getBillingProviderConfig = async (provider: BillingProvider) => {
           onCancel,
         },
       );
+    case BillingProvider.POLAR:
+      return prompts(
+        [
+          {
+            type: "text",
+            name: config.env.billing.polar.accessToken,
+            message: "Enter your Polar access token",
+          },
+          {
+            type: "text",
+            name: config.env.billing.polar.webhookSecret,
+            message: "Enter your Polar webhook secret",
+          },
+          {
+            type: "text",
+            name: config.env.billing.polar.organizationSlug,
+            message: "Enter your Polar organization slug",
+          },
+        ],
+        {
+          onCancel,
+        },
+      );
   }
 };
 

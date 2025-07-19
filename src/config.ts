@@ -10,6 +10,7 @@ export const StorageProvider = {
 export const BillingProvider = {
   STRIPE: "stripe",
   LEMON_SQUEEZY: "lemon-squeezy",
+  POLAR: "polar",
 } as const;
 
 export const EmailProvider = {
@@ -63,6 +64,11 @@ const env = {
       signingSecret: "LEMON_SQUEEZY_SIGNING_SECRET",
       storeId: "LEMON_SQUEEZY_STORE_ID",
     },
+    polar: {
+      accessToken: "POLAR_ACCESS_TOKEN",
+      webhookSecret: "POLAR_WEBHOOK_SECRET",
+      organizationSlug: "POLAR_ORGANIZATION_SLUG",
+    },
   },
   email: {
     provider: "EMAIL_PROVIDER",
@@ -106,6 +112,9 @@ export const envInPaths = {
     env.billing.lemonsqueezy.apiKey,
     env.billing.lemonsqueezy.signingSecret,
     env.billing.lemonsqueezy.storeId,
+    env.billing.polar.accessToken,
+    env.billing.polar.webhookSecret,
+    env.billing.polar.organizationSlug,
     env.email.provider,
     env.email.resend.apiKey,
     env.email.sendgrid.apiKey,

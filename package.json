@@ -32,7 +32,6 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "prepare": "pnpm run build",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
@@ -42,6 +41,8 @@
   "license": "ISC",
   "description": "Your TurboStarter assistant for starting new projects, adding plugins and more.",
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.2",
     "@eslint/compat": "1.2.0",
     "@types/lodash": "4.17.12",
     "@types/node": "22.7.5",
