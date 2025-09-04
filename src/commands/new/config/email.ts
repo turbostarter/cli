@@ -4,13 +4,13 @@ import { EmailProvider, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
 
 const getEmailProvider = async (): Promise<{
-  [key in typeof config.env.email.provider]: EmailProvider;
+  provider: EmailProvider;
 }> => {
   return prompts(
     [
       {
         type: "select",
-        name: config.env.email.provider,
+        name: "provider",
         message: "What do you want to use for emails?",
         choices: Object.values(EmailProvider).map((provider) => ({
           title: getLabel(provider),
@@ -110,8 +110,8 @@ const getEmailProviderConfig = async (provider: EmailProvider) => {
 };
 
 export const getEmailConfig = async () => {
-  const provider = await getEmailProvider();
-  const config = await getEmailProviderConfig(provider.EMAIL_PROVIDER);
+  const { provider } = await getEmailProvider();
+  const env = await getEmailProviderConfig(provider);
 
-  return { ...provider, ...config };
+  return { provider, env };
 };

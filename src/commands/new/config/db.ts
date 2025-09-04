@@ -1,6 +1,6 @@
 import prompts from "prompts";
 
-import { config, DatabaseType } from "~/config";
+import { config, ServiceType } from "~/config";
 import { onCancel } from "~/utils";
 
 const getDatabaseCloudConfig = async () => {
@@ -28,12 +28,12 @@ export const getDatabaseConfig = async () => {
         choices: [
           {
             title: "Local (powered by Docker)",
-            value: DatabaseType.LOCAL,
+            value: ServiceType.LOCAL,
             selected: true,
           },
           {
             title: `Cloud`,
-            value: DatabaseType.CLOUD,
+            value: ServiceType.CLOUD,
           },
         ],
       },
@@ -43,7 +43,7 @@ export const getDatabaseConfig = async () => {
     },
   );
 
-  if (response.type === DatabaseType.CLOUD) {
+  if (response.type === ServiceType.CLOUD) {
     const dbConfig = await getDatabaseCloudConfig();
 
     return { ...response, env: dbConfig };
