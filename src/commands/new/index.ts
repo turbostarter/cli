@@ -153,11 +153,9 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
 
   try {
     const url = await getRepositoryUrl(config.repository);
-    await execa(
-      "git",
-      ["clone", "-b", "mobile-onboarding", "--single-branch", url, name],
-      { cwd },
-    );
+    await execa("git", ["clone", "-b", "main", "--single-branch", url, name], {
+      cwd,
+    });
 
     if (filesToRemove.length) {
       await execa("rm", ["-rf", ...filesToRemove], { cwd: projectDir });
