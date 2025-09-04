@@ -5,7 +5,7 @@ import { onCancel } from "~/utils";
 import { getLabel } from "~/utils";
 
 const getStorageProvider = async (): Promise<{
-  [key in typeof config.env.storage.provider]: StorageProvider;
+  provider: StorageProvider;
 }> => {
   return prompts(
     [
@@ -15,7 +15,7 @@ const getStorageProvider = async (): Promise<{
           title: getLabel(provider),
           value: provider,
         })),
-        name: config.env.storage.provider,
+        name: "provider",
         message: "What do you want to use for storage?",
       },
     ],
@@ -63,8 +63,8 @@ const getStorageProviderConfig = () => {
 };
 
 export const getStorageConfig = async () => {
-  const provider = await getStorageProvider();
-  const config = await getStorageProviderConfig();
+  const { provider } = await getStorageProvider();
+  const env = await getStorageProviderConfig();
 
-  return { ...provider, ...config };
+  return { provider, env };
 };

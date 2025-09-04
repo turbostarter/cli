@@ -4,7 +4,7 @@ import { BillingProvider, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
 
 const getBillingProvider = async (): Promise<{
-  [key in typeof config.env.billing.provider]: BillingProvider;
+  provider: BillingProvider;
 }> => {
   return prompts(
     [
@@ -14,7 +14,7 @@ const getBillingProvider = async (): Promise<{
           title: getLabel(provider),
           value: provider,
         })),
-        name: config.env.billing.provider,
+        name: "provider",
         message: "What do you want to use for billing?",
       },
     ],
@@ -49,17 +49,17 @@ const getBillingProviderConfig = async (provider: BillingProvider) => {
         [
           {
             type: "text",
-            name: config.env.billing.lemonsqueezy.storeId,
+            name: config.env.billing["lemon-squeezy"].storeId,
             message: "Enter your Lemon Squeezy store ID",
           },
           {
             type: "text",
-            name: config.env.billing.lemonsqueezy.apiKey,
+            name: config.env.billing["lemon-squeezy"].apiKey,
             message: "Enter your Lemon Squeezy API key",
           },
           {
             type: "text",
-            name: config.env.billing.lemonsqueezy.signingSecret,
+            name: config.env.billing["lemon-squeezy"].signingSecret,
             message: "Enter your Lemon Squeezy signing secret",
           },
         ],
@@ -94,8 +94,8 @@ const getBillingProviderConfig = async (provider: BillingProvider) => {
 };
 
 export const getBillingConfig = async () => {
-  const provider = await getBillingProvider();
-  const config = await getBillingProviderConfig(provider.BILLING_PROVIDER);
+  const { provider } = await getBillingProvider();
+  const env = await getBillingProviderConfig(provider);
 
-  return { ...provider, ...config };
+  return { provider, env };
 };

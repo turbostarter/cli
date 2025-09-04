@@ -14,9 +14,17 @@ import {
   setEnvironmentVariables,
 } from "~/commands/new/config/env";
 import { getStorageConfig } from "~/commands/new/config/storage";
-import { startDatabase } from "~/commands/new/db";
-import { App, appSpecificFiles, config, DatabaseType } from "~/config";
+import { startServices } from "~/commands/new/services";
+import {
+  App,
+  appSpecificFiles,
+  config,
+  providerConfigFiles,
+  Service,
+  ServiceType,
+} from "~/config";
 import { handleError, logger, onCancel } from "~/utils";
+import { replaceInFiles } from "~/utils/file";
 
 import { validatePrerequisites } from "./prerequisites";
 
@@ -94,11 +102,11 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   const emailConfig = await getEmailConfig();
   const storageConfig = await getStorageConfig();
 
-  const config = {
+  const env = {
     ...("env" in dbConfig ? dbConfig.env : {}),
-    ...billingConfig,
-    ...emailConfig,
-    ...storageConfig,
+    ...billingConfig.env,
+    ...emailConfig.env,
+    ...storageConfig.env,
   };
 
   const projectDir = await cloneRepository(
@@ -106,13 +114,31 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
     global.name,
     global.apps,
   );
-  await configureGit(projectDir);
   await prepareEnvironment(projectDir);
-  await setEnvironmentVariables(projectDir, config);
+  await updateProvidersFiles(projectDir, {
+    billing: billingConfig.provider,
+    email: emailConfig.provider,
+    storage: storageConfig.provider,
+  });
+  await setEnvironmentVariables(projectDir, env);
+  await configureGit(projectDir);
   await installDependencies(projectDir);
 
-  if (dbConfig.type === DatabaseType.LOCAL) {
-    await startDatabase(projectDir);
+  const localServices = [
+    ...(dbConfig.type === ServiceType.LOCAL ? [Service.DB] : []),
+  ];
+
+  if (localServices.length > 0) {
+    await startServices(projectDir, localServices);
+  }
+};
+
+const getRepositoryUrl = async (httpsUrl: string): Promise<string> => {
+  try {
+    await execa("ssh", ["-T", "git@github.com"], { timeout: 5000 });
+    return httpsUrl.replace("https://github.com/", "git@github.com:");
+  } catch {
+    return httpsUrl;
   }
 };
 
@@ -126,9 +152,10 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
     .flat();
 
   try {
+    const url = await getRepositoryUrl(config.repository);
     await execa(
       "git",
-      ["clone", "-b", "main", "--single-branch", config.repository, name],
+      ["clone", "-b", "mobile-onboarding", "--single-branch", url, name],
       { cwd },
     );
 
@@ -172,6 +199,32 @@ const installDependencies = async (cwd: string) => {
     spinner.succeed("Dependencies successfully installed!");
   } catch {
     spinner.fail("Failed to install dependencies! Please try again.");
+    process.exit(1);
+  }
+};
+
+const updateProvidersFiles = async (
+  cwd: string,
+  providers: Record<keyof typeof providerConfigFiles, string>,
+) => {
+  const spinner = ora(`Updating providers files...`).start();
+
+  try {
+    await Promise.all(
+      Object.entries(providers).map(([key, value]) => {
+        const provider = key as keyof typeof providerConfigFiles;
+        return replaceInFiles({
+          cwd,
+          paths: providerConfigFiles[provider].files,
+          pattern: providerConfigFiles[provider].pattern,
+          value,
+        });
+      }),
+    );
+
+    spinner.succeed("Providers files successfully updated!");
+  } catch {
+    spinner.fail("Failed to update providers files! Please try again.");
     process.exit(1);
   }
 };

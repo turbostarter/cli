@@ -1,7 +1,11 @@
-export const DatabaseType = {
+export const ServiceType = {
   LOCAL: "local",
   CLOUD: "cloud",
 } as const;
+
+export const Service = {
+  DB: "db",
+};
 
 export const StorageProvider = {
   S3: "s3",
@@ -39,7 +43,8 @@ export const App = {
   EXTENSION: "extension",
 } as const;
 
-export type DatabaseType = (typeof DatabaseType)[keyof typeof DatabaseType];
+export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType];
+export type Service = (typeof Service)[keyof typeof Service];
 export type StorageProvider =
   (typeof StorageProvider)[keyof typeof StorageProvider];
 export type BillingProvider =
@@ -54,37 +59,35 @@ const env = {
     url: "DATABASE_URL",
   },
   billing: {
-    provider: "BILLING_PROVIDER",
-    stripe: {
+    [BillingProvider.STRIPE]: {
       secretKey: "STRIPE_SECRET_KEY",
       webhookSecret: "STRIPE_WEBHOOK_SECRET",
     },
-    lemonsqueezy: {
+    [BillingProvider.LEMON_SQUEEZY]: {
       apiKey: "LEMON_SQUEEZY_API_KEY",
       signingSecret: "LEMON_SQUEEZY_SIGNING_SECRET",
       storeId: "LEMON_SQUEEZY_STORE_ID",
     },
-    polar: {
+    [BillingProvider.POLAR]: {
       accessToken: "POLAR_ACCESS_TOKEN",
       webhookSecret: "POLAR_WEBHOOK_SECRET",
       organizationSlug: "POLAR_ORGANIZATION_SLUG",
     },
   },
   email: {
-    provider: "EMAIL_PROVIDER",
-    resend: {
+    [EmailProvider.RESEND]: {
       apiKey: "RESEND_API_KEY",
     },
-    sendgrid: {
+    [EmailProvider.SENDGRID]: {
       apiKey: "SENDGRID_API_KEY",
     },
-    plunk: {
+    [EmailProvider.PLUNK]: {
       apiKey: "PLUNK_API_KEY",
     },
-    postmark: {
+    [EmailProvider.POSTMARK]: {
       apiKey: "POSTMARK_API_KEY",
     },
-    nodemailer: {
+    [EmailProvider.NODEMAILER]: {
       user: "NODEMAILER_USER",
       password: "NODEMAILER_PASSWORD",
       host: "NODEMAILER_HOST",
@@ -92,8 +95,7 @@ const env = {
     },
   },
   storage: {
-    provider: "STORAGE_PROVIDER",
-    s3: {
+    [StorageProvider.S3]: {
       region: "S3_REGION",
       bucket: "S3_BUCKET",
       endpoint: "S3_ENDPOINT",
@@ -106,23 +108,20 @@ const env = {
 export const envInPaths = {
   [EnvPath.ROOT]: [env.db.url],
   [EnvPath.WEB]: [
-    env.billing.provider,
     env.billing.stripe.secretKey,
     env.billing.stripe.webhookSecret,
-    env.billing.lemonsqueezy.apiKey,
-    env.billing.lemonsqueezy.signingSecret,
-    env.billing.lemonsqueezy.storeId,
+    env.billing["lemon-squeezy"].apiKey,
+    env.billing["lemon-squeezy"].signingSecret,
+    env.billing["lemon-squeezy"].storeId,
     env.billing.polar.accessToken,
     env.billing.polar.webhookSecret,
     env.billing.polar.organizationSlug,
-    env.email.provider,
     env.email.resend.apiKey,
     env.email.sendgrid.apiKey,
     env.email.plunk.apiKey,
     env.email.postmark.apiKey,
     env.email.nodemailer.user,
     env.email.nodemailer.password,
-    env.storage.provider,
     env.storage.s3.accessKeyId,
     env.storage.s3.secretAccessKey,
   ],
@@ -141,6 +140,34 @@ export const appSpecificFiles = {
     "packages/analytics/extension",
     ".github/workflows/publish-extension.yml",
   ],
+};
+
+export const providerConfigFiles = {
+  billing: {
+    files: [
+      "packages/billing/src/providers/index.ts",
+      "packages/billing/src/providers/env.ts",
+    ],
+    pattern: new RegExp(`(${Object.values(BillingProvider).join("|")})`, "gi"),
+  },
+  email: {
+    files: [
+      "packages/email/src/providers/index.ts",
+      "packages/email/src/providers/env.ts",
+    ],
+    pattern: new RegExp(`(${Object.values(EmailProvider).join("|")})`, "gi"),
+  },
+  storage: {
+    files: [
+      "packages/storage/src/providers/index.ts",
+      "packages/storage/src/providers/env.ts",
+    ],
+    pattern: new RegExp(`(${Object.values(StorageProvider).join("|")})`, "gi"),
+  },
+};
+
+export const servicesPackages: Record<Service, string> = {
+  [Service.DB]: "@turbostarter/db",
 };
 
 export const config = {
