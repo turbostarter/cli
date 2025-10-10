@@ -6,6 +6,7 @@ import color from "picocolors";
 import prompts from "prompts";
 import { z } from "zod";
 
+import { getAnalyticsConfig } from "~/commands/new/config/analytics";
 import { getBillingConfig } from "~/commands/new/config/billing";
 import { getDatabaseConfig } from "~/commands/new/config/db";
 import { getEmailConfig } from "~/commands/new/config/email";
@@ -28,6 +29,13 @@ import { replaceInFiles } from "~/utils/file";
 
 import { validatePrerequisites } from "./prerequisites";
 
+import type {
+  AnalyticsProvider,
+  BillingProvider,
+  EmailProvider,
+  StorageProvider,
+} from "~/config";
+
 const newOptionsSchema = z.object({
   cwd: z.string(),
 });
@@ -48,12 +56,12 @@ export const newCommand = new Command()
         cwd: path.resolve(opts.cwd),
       });
 
-      await initializeProject(options);
+      const { name } = await initializeProject(options);
 
       logger.log(
         `\n🎉 You can now get started. Open the project and just ship it! 🎉\n`,
       );
-
+      logger.log(`> cd ${name}\n> pnpm dev\n`);
       logger.info(
         `Problems? ${color.underline("https://turbostarter.dev/docs")}`,
       );
@@ -66,8 +74,70 @@ export const newCommand = new Command()
 const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   await validatePrerequisites();
 
-  const global = await prompts(
-    [
+  const name = await getName();
+  const apps = await getApps();
+
+  const dbConfig = await getDatabaseConfig();
+  const billingConfig = await getBillingConfig();
+  const emailConfig = await getEmailConfig();
+  const storageConfig = await getStorageConfig();
+  const analyticsConfig = await getAnalyticsConfig(apps);
+
+  const env = {
+    ...("env" in dbConfig ? dbConfig.env : {}),
+    ...billingConfig.env,
+    ...emailConfig.env,
+    ...storageConfig.env,
+    ...analyticsConfig.env,
+  };
+
+  logger.log(
+    `\nCreating a new TurboStarter project in ${color.greenBright(join(options.cwd, name))}. \n`,
+  );
+
+  const projectDir = await cloneRepository(options.cwd, name, apps);
+  await prepareEnvironment(projectDir);
+  await updateProvidersFiles(projectDir, {
+    billing: billingConfig.provider,
+    email: emailConfig.provider,
+    storage: storageConfig.provider,
+    analytics: analyticsConfig.providers,
+  });
+  await setEnvironmentVariables(projectDir, env);
+  await configureGit(projectDir);
+  await installDependencies(projectDir);
+
+  const localServices = [
+    ...(dbConfig.type === ServiceType.LOCAL ? [Service.DB] : []),
+  ];
+
+  if (localServices.length > 0) {
+    await startServices(projectDir, localServices);
+  }
+
+  return { name, apps };
+};
+
+const getName = async () => {
+  const result = await prompts(
+    {
+      type: "text",
+      name: "name",
+      message: "Enter your project name.",
+      validate: (value: string) =>
+        value.length > 0 ? true : "Name is required!",
+    },
+    {
+      onCancel,
+    },
+  );
+
+  return String(result.name);
+};
+
+const getApps = async () => {
+  while (true) {
+    const result = await prompts(
       {
         type: "multiselect",
         name: "apps",
@@ -85,51 +155,19 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
         hint: `You ${color.bold("must")} ship a web app, to ensure backend services work.`,
       },
       {
-        type: "text",
-        name: "name",
-        message: "Enter your project name.",
-        validate: (value: string) =>
-          value.length > 0 ? true : "Name is required!",
+        onCancel,
       },
-    ],
-    {
-      onCancel,
-    },
-  );
+    );
 
-  const dbConfig = await getDatabaseConfig();
-  const billingConfig = await getBillingConfig();
-  const emailConfig = await getEmailConfig();
-  const storageConfig = await getStorageConfig();
+    const apps = result.apps as App[];
 
-  const env = {
-    ...("env" in dbConfig ? dbConfig.env : {}),
-    ...billingConfig.env,
-    ...emailConfig.env,
-    ...storageConfig.env,
-  };
-
-  const projectDir = await cloneRepository(
-    options.cwd,
-    global.name,
-    global.apps,
-  );
-  await prepareEnvironment(projectDir);
-  await updateProvidersFiles(projectDir, {
-    billing: billingConfig.provider,
-    email: emailConfig.provider,
-    storage: storageConfig.provider,
-  });
-  await setEnvironmentVariables(projectDir, env);
-  await configureGit(projectDir);
-  await installDependencies(projectDir);
-
-  const localServices = [
-    ...(dbConfig.type === ServiceType.LOCAL ? [Service.DB] : []),
-  ];
-
-  if (localServices.length > 0) {
-    await startServices(projectDir, localServices);
+    if (apps.includes(App.WEB)) {
+      return apps;
+    } else {
+      logger.error(
+        `You ${color.bold("must")} ship a web app, to ensure backend services work.`,
+      );
+    }
   }
 };
 
@@ -203,22 +241,52 @@ const installDependencies = async (cwd: string) => {
 
 const updateProvidersFiles = async (
   cwd: string,
-  providers: Record<keyof typeof providerConfigFiles, string>,
+  providers: {
+    billing?: BillingProvider;
+    email?: EmailProvider;
+    storage?: StorageProvider;
+    analytics?: Partial<AnalyticsProvider>;
+  },
 ) => {
   const spinner = ora(`Updating providers files...`).start();
 
   try {
-    await Promise.all(
-      Object.entries(providers).map(([key, value]) => {
-        const provider = key as keyof typeof providerConfigFiles;
-        return replaceInFiles({
-          cwd,
-          paths: providerConfigFiles[provider].files,
-          pattern: providerConfigFiles[provider].pattern,
-          value,
-        });
-      }),
-    );
+    if (providers.billing) {
+      await replaceInFiles({
+        cwd,
+        paths: providerConfigFiles.billing.files,
+        pattern: providerConfigFiles.billing.pattern,
+        value: providers.billing,
+      });
+    }
+    if (providers.email) {
+      await replaceInFiles({
+        cwd,
+        paths: providerConfigFiles.email.files,
+        pattern: providerConfigFiles.email.pattern,
+        value: providers.email,
+      });
+    }
+    if (providers.storage) {
+      await replaceInFiles({
+        cwd,
+        paths: providerConfigFiles.storage.files,
+        pattern: providerConfigFiles.storage.pattern,
+        value: providers.storage,
+      });
+    }
+    if (providers.analytics && Object.keys(providers.analytics).length > 0) {
+      await Promise.all(
+        Object.entries(providers.analytics).map(([key, value]) =>
+          replaceInFiles({
+            cwd,
+            paths: providerConfigFiles.analytics[key as App].files,
+            pattern: providerConfigFiles.analytics[key as App].pattern,
+            value,
+          }),
+        ),
+      );
+    }
 
     spinner.succeed("Providers files successfully updated!");
   } catch {

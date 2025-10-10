@@ -43,6 +43,28 @@ export const App = {
   EXTENSION: "extension",
 } as const;
 
+export const AnalyticsProvider = {
+  [App.WEB]: {
+    GOOGLE_ANALYTICS: "google-analytics",
+    MIXPANEL: "mixpanel",
+    OPEN_PANEL: "open-panel",
+    PLAUSIBLE: "plausible",
+    POSTHOG: "posthog",
+    UMAMI: "umami",
+    VEMETRIC: "vemetric",
+    VERCEL: "vercel",
+  },
+  [App.MOBILE]: {
+    GOOGLE_ANALYTICS: "google-analytics",
+    MIXPANEL: "mixpanel",
+    POSTHOG: "posthog",
+  },
+  [App.EXTENSION]: {
+    GOOGLE_ANALYTICS: "google-analytics",
+    POSTHOG: "posthog",
+  },
+} as const;
+
 export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType];
 export type Service = (typeof Service)[keyof typeof Service];
 export type StorageProvider =
@@ -53,6 +75,9 @@ export type EmailProvider = (typeof EmailProvider)[keyof typeof EmailProvider];
 export type EnvPath = (typeof EnvPath)[keyof typeof EnvPath];
 export type EnvFile = (typeof EnvFile)[keyof typeof EnvFile];
 export type App = (typeof App)[keyof typeof App];
+export type AnalyticsProvider = {
+  [K in App]: (typeof AnalyticsProvider)[K][keyof (typeof AnalyticsProvider)[K]];
+};
 
 const env = {
   db: {
@@ -103,6 +128,59 @@ const env = {
       secretAccessKey: "S3_SECRET_ACCESS_KEY",
     },
   },
+  analytics: {
+    [App.WEB]: {
+      [AnalyticsProvider[App.WEB].GOOGLE_ANALYTICS]: {
+        measurementId: "NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID",
+        secret: "GOOGLE_ANALYTICS_SECRET",
+      },
+      [AnalyticsProvider[App.WEB].MIXPANEL]: {
+        token: "NEXT_PUBLIC_MIXPANEL_TOKEN",
+      },
+      [AnalyticsProvider[App.WEB].OPEN_PANEL]: {
+        clientId: "NEXT_PUBLIC_OPEN_PANEL_CLIENT_ID",
+        secret: "OPEN_PANEL_SECRET",
+      },
+      [AnalyticsProvider[App.WEB].PLAUSIBLE]: {
+        domain: "NEXT_PUBLIC_PLAUSIBLE_DOMAIN",
+        host: "NEXT_PUBLIC_PLAUSIBLE_HOST",
+      },
+      [AnalyticsProvider[App.WEB].POSTHOG]: {
+        key: "NEXT_PUBLIC_POSTHOG_KEY",
+        host: "NEXT_PUBLIC_POSTHOG_HOST",
+      },
+      [AnalyticsProvider[App.WEB].UMAMI]: {
+        host: "NEXT_PUBLIC_UMAMI_HOST",
+        websiteId: "NEXT_PUBLIC_UMAMI_WEBSITE_ID",
+        apiHost: "UMAMI_API_HOST",
+        apiKey: "UMAMI_API_KEY",
+      },
+      [AnalyticsProvider[App.WEB].VEMETRIC]: {
+        token: "NEXT_PUBLIC_VEMETRIC_PROJECT_TOKEN",
+      },
+      [AnalyticsProvider[App.WEB].VERCEL]: {},
+    },
+    [App.MOBILE]: {
+      [AnalyticsProvider[App.MOBILE].GOOGLE_ANALYTICS]: {},
+      [AnalyticsProvider[App.MOBILE].MIXPANEL]: {
+        token: "EXPO_PUBLIC_MIXPANEL_TOKEN",
+      },
+      [AnalyticsProvider[App.MOBILE].POSTHOG]: {
+        key: "EXPO_PUBLIC_POSTHOG_KEY",
+        host: "EXPO_PUBLIC_POSTHOG_HOST",
+      },
+    },
+    [App.EXTENSION]: {
+      [AnalyticsProvider[App.EXTENSION].GOOGLE_ANALYTICS]: {
+        measurementId: "VITE_GOOGLE_ANALYTICS_MEASUREMENT_ID",
+        secret: "VITE_GOOGLE_ANALYTICS_SECRET",
+      },
+      [AnalyticsProvider[App.EXTENSION].POSTHOG]: {
+        key: "VITE_POSTHOG_KEY",
+        host: "VITE_POSTHOG_HOST",
+      },
+    },
+  },
 } as const;
 
 export const envInPaths = {
@@ -124,6 +202,31 @@ export const envInPaths = {
     env.email.nodemailer.password,
     env.storage.s3.accessKeyId,
     env.storage.s3.secretAccessKey,
+    env.analytics[App.WEB]["google-analytics"].measurementId,
+    env.analytics[App.WEB]["google-analytics"].secret,
+    env.analytics[App.WEB].mixpanel.token,
+    env.analytics[App.WEB]["open-panel"].clientId,
+    env.analytics[App.WEB]["open-panel"].secret,
+    env.analytics[App.WEB].plausible.domain,
+    env.analytics[App.WEB].plausible.host,
+    env.analytics[App.WEB].posthog.key,
+    env.analytics[App.WEB].posthog.host,
+    env.analytics[App.WEB].umami.host,
+    env.analytics[App.WEB].umami.websiteId,
+    env.analytics[App.WEB].umami.apiHost,
+    env.analytics[App.WEB].umami.apiKey,
+    env.analytics[App.WEB].vemetric.token,
+  ],
+  [EnvPath.MOBILE]: [
+    env.analytics[App.MOBILE].mixpanel.token,
+    env.analytics[App.MOBILE].posthog.key,
+    env.analytics[App.MOBILE].posthog.host,
+  ],
+  [EnvPath.EXTENSION]: [
+    env.analytics[App.EXTENSION]["google-analytics"].measurementId,
+    env.analytics[App.EXTENSION]["google-analytics"].secret,
+    env.analytics[App.EXTENSION].posthog.key,
+    env.analytics[App.EXTENSION].posthog.host,
   ],
 };
 
@@ -164,6 +267,33 @@ export const providerConfigFiles = {
     ],
     pattern: new RegExp(`(${Object.values(StorageProvider).join("|")})`, "gi"),
   },
+  analytics: {
+    [App.WEB]: {
+      files: [
+        "packages/analytics/web/src/providers/index.tsx",
+        "packages/analytics/web/src/providers/server.ts",
+        "packages/analytics/web/src/providers/env.ts",
+      ],
+      pattern: new RegExp(
+        `(${Object.values(AnalyticsProvider[App.WEB]).join("|")})`,
+        "gi",
+      ),
+    },
+    [App.MOBILE]: {
+      files: ["packages/analytics/mobile/src/providers/index.ts"],
+      pattern: new RegExp(
+        `(${Object.values(AnalyticsProvider[App.MOBILE]).join("|")})`,
+        "gi",
+      ),
+    },
+    [App.EXTENSION]: {
+      files: ["packages/analytics/extension/src/providers/index.ts"],
+      pattern: new RegExp(
+        `(${Object.values(AnalyticsProvider[App.EXTENSION]).join("|")})`,
+        "gi",
+      ),
+    },
+  },
 };
 
 export const servicesPackages: Record<Service, string> = {
@@ -172,6 +302,6 @@ export const servicesPackages: Record<Service, string> = {
 
 export const config = {
   name: "TurboStarter",
-  repository: "https://github.com/turbostarter/main.git",
+  repository: "https://github.com/turbostarter/core.git",
   env,
 } as const;

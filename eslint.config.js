@@ -5,10 +5,11 @@ import eslint from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 
-export default tseslint.config(
+export default defineConfig(
   includeIgnoreFile(
-    path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".gitignore")
+    path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".gitignore"),
   ),
   { ignores: ["**/*.config.*"] },
   {
@@ -90,5 +91,5 @@ export default tseslint.config(
   {
     linterOptions: { reportUnusedDisableDirectives: true },
     languageOptions: { parserOptions: { projectService: true } },
-  }
+  },
 );
