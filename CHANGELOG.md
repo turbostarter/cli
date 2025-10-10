@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.1.0
+
+### Minor Changes
+
+- [`43388f5`](https://github.com/turbostarter/cli/commit/43388f5a9a5fdec53bef96d0c5d8baafdc112266) Thanks [@Bartek532](https://github.com/Bartek532)! - feat: add analytics configuration to new command
+
 ## 1.0.7
 
 ### Patch Changes
