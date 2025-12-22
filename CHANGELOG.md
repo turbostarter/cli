@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.2.0
+
+### Minor Changes
+
+- [#5](https://github.com/turbostarter/cli/pull/5) [`f29a802`](https://github.com/turbostarter/cli/commit/f29a802f5c8c8fcba99001d18a325c71c74d9f5e) Thanks [@Bartek532](https://github.com/Bartek532)! - monitoring configuration in `new` command
+
 ## 1.1.0
 
 ### Minor Changes
