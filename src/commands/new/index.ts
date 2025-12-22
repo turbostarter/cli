@@ -14,6 +14,7 @@ import {
   prepareEnvironment,
   setEnvironmentVariables,
 } from "~/commands/new/config/env";
+import { getMonitoringConfig } from "~/commands/new/config/monitoring";
 import { getStorageConfig } from "~/commands/new/config/storage";
 import { startServices } from "~/commands/new/services";
 import {
@@ -33,6 +34,7 @@ import type {
   AnalyticsProvider,
   BillingProvider,
   EmailProvider,
+  MonitoringProvider,
   StorageProvider,
 } from "~/config";
 
@@ -50,7 +52,7 @@ export const newCommand = new Command()
   )
   .action(async (opts: z.infer<typeof newOptionsSchema>) => {
     try {
-      logger.log(`${color.bgYellow(color.black(" TurboStarter "))}\n`);
+      logger.log(`${color.bgRedBright(color.white(" TurboStarter "))}\n`);
 
       const options = newOptionsSchema.parse({
         cwd: path.resolve(opts.cwd),
@@ -77,11 +79,16 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   const name = await getName();
   const apps = await getApps();
 
+  logger.info(
+    `\nLet's configure it!\nYou can skip any step by pressing ${color.bold("enter")}.\n`,
+  );
+
   const dbConfig = await getDatabaseConfig();
   const billingConfig = await getBillingConfig();
   const emailConfig = await getEmailConfig();
   const storageConfig = await getStorageConfig();
   const analyticsConfig = await getAnalyticsConfig(apps);
+  const monitoringConfig = await getMonitoringConfig(apps);
 
   const env = {
     ...("env" in dbConfig ? dbConfig.env : {}),
@@ -89,6 +96,7 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
     ...emailConfig.env,
     ...storageConfig.env,
     ...analyticsConfig.env,
+    ...monitoringConfig.env,
   };
 
   logger.log(
@@ -102,6 +110,7 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
     email: emailConfig.provider,
     storage: storageConfig.provider,
     analytics: analyticsConfig.providers,
+    monitoring: monitoringConfig.providers,
   });
   await setEnvironmentVariables(projectDir, env);
   await configureGit(projectDir);
@@ -246,6 +255,7 @@ const updateProvidersFiles = async (
     email?: EmailProvider;
     storage?: StorageProvider;
     analytics?: Partial<AnalyticsProvider>;
+    monitoring?: Partial<MonitoringProvider>;
   },
 ) => {
   const spinner = ora(`Updating providers files...`).start();
@@ -282,6 +292,18 @@ const updateProvidersFiles = async (
             cwd,
             paths: providerConfigFiles.analytics[key as App].files,
             pattern: providerConfigFiles.analytics[key as App].pattern,
+            value,
+          }),
+        ),
+      );
+    }
+    if (providers.monitoring && Object.keys(providers.monitoring).length > 0) {
+      await Promise.all(
+        Object.entries(providers.monitoring).map(([key, value]) =>
+          replaceInFiles({
+            cwd,
+            paths: providerConfigFiles.monitoring[key as App].files,
+            pattern: providerConfigFiles.monitoring[key as App].pattern,
             value,
           }),
         ),
