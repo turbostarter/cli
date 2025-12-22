@@ -65,6 +65,21 @@ export const AnalyticsProvider = {
   },
 } as const;
 
+export const MonitoringProvider = {
+  [App.WEB]: {
+    SENTRY: "sentry",
+    POSTHOG: "posthog",
+  },
+  [App.MOBILE]: {
+    SENTRY: "sentry",
+    POSTHOG: "posthog",
+  },
+  [App.EXTENSION]: {
+    SENTRY: "sentry",
+    POSTHOG: "posthog",
+  },
+} as const;
+
 export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType];
 export type Service = (typeof Service)[keyof typeof Service];
 export type StorageProvider =
@@ -77,6 +92,9 @@ export type EnvFile = (typeof EnvFile)[keyof typeof EnvFile];
 export type App = (typeof App)[keyof typeof App];
 export type AnalyticsProvider = {
   [K in App]: (typeof AnalyticsProvider)[K][keyof (typeof AnalyticsProvider)[K]];
+};
+export type MonitoringProvider = {
+  [K in App]: (typeof MonitoringProvider)[K][keyof (typeof MonitoringProvider)[K]];
 };
 
 const env = {
@@ -181,6 +199,35 @@ const env = {
       },
     },
   },
+  monitoring: {
+    [App.WEB]: {
+      [MonitoringProvider[App.WEB].SENTRY]: {
+        dsn: "NEXT_PUBLIC_SENTRY_DSN",
+      },
+      [MonitoringProvider[App.WEB].POSTHOG]: {
+        key: "NEXT_PUBLIC_POSTHOG_KEY",
+        host: "NEXT_PUBLIC_POSTHOG_HOST",
+      },
+    },
+    [App.MOBILE]: {
+      [MonitoringProvider[App.MOBILE].SENTRY]: {
+        dsn: "EXPO_PUBLIC_SENTRY_DSN",
+      },
+      [MonitoringProvider[App.MOBILE].POSTHOG]: {
+        key: "EXPO_PUBLIC_POSTHOG_KEY",
+        host: "EXPO_PUBLIC_POSTHOG_HOST",
+      },
+    },
+    [App.EXTENSION]: {
+      [MonitoringProvider[App.EXTENSION].SENTRY]: {
+        dsn: "VITE_SENTRY_DSN",
+      },
+      [MonitoringProvider[App.EXTENSION].POSTHOG]: {
+        key: "VITE_POSTHOG_KEY",
+        host: "VITE_POSTHOG_HOST",
+      },
+    },
+  },
 } as const;
 
 export const envInPaths = {
@@ -216,17 +263,22 @@ export const envInPaths = {
     env.analytics[App.WEB].umami.apiHost,
     env.analytics[App.WEB].umami.apiKey,
     env.analytics[App.WEB].vemetric.token,
+    env.monitoring[App.WEB].sentry.dsn,
+    env.monitoring[App.WEB].posthog.key,
+    env.monitoring[App.WEB].posthog.host,
   ],
   [EnvPath.MOBILE]: [
     env.analytics[App.MOBILE].mixpanel.token,
     env.analytics[App.MOBILE].posthog.key,
     env.analytics[App.MOBILE].posthog.host,
+    env.monitoring[App.MOBILE].sentry.dsn,
   ],
   [EnvPath.EXTENSION]: [
     env.analytics[App.EXTENSION]["google-analytics"].measurementId,
     env.analytics[App.EXTENSION]["google-analytics"].secret,
     env.analytics[App.EXTENSION].posthog.key,
     env.analytics[App.EXTENSION].posthog.host,
+    env.monitoring[App.EXTENSION].sentry.dsn,
   ],
 };
 
@@ -236,11 +288,13 @@ export const appSpecificFiles = {
     "apps/mobile",
     "packages/ui/mobile",
     "packages/analytics/mobile",
+    "packages/monitoring/mobile",
     ".github/workflows/publish-mobile.yml",
   ],
   [App.EXTENSION]: [
     "apps/extension",
     "packages/analytics/extension",
+    "packages/monitoring/extension",
     ".github/workflows/publish-extension.yml",
   ],
 };
@@ -290,6 +344,29 @@ export const providerConfigFiles = {
       files: ["packages/analytics/extension/src/providers/index.ts"],
       pattern: new RegExp(
         `(${Object.values(AnalyticsProvider[App.EXTENSION]).join("|")})`,
+        "gi",
+      ),
+    },
+  },
+  monitoring: {
+    [App.WEB]: {
+      files: ["packages/monitoring/web/src/providers/index.ts"],
+      pattern: new RegExp(
+        `(${Object.values(MonitoringProvider[App.WEB]).join("|")})`,
+        "gi",
+      ),
+    },
+    [App.MOBILE]: {
+      files: ["packages/monitoring/mobile/src/providers/index.ts"],
+      pattern: new RegExp(
+        `(${Object.values(MonitoringProvider[App.MOBILE]).join("|")})`,
+        "gi",
+      ),
+    },
+    [App.EXTENSION]: {
+      files: ["packages/monitoring/extension/src/providers/index.ts"],
+      pattern: new RegExp(
+        `(${Object.values(MonitoringProvider[App.EXTENSION]).join("|")})`,
         "gi",
       ),
     },
