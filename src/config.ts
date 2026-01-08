@@ -374,7 +374,7 @@ export const providerConfigFiles = {
 };
 
 export const servicesPackages: Record<Service, string> = {
-  [Service.DB]: "@turbostarter/db",
+  [Service.DB]: "@workspace/db",
 };
 
 export const config = {
