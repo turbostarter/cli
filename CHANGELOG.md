@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.2.1
+
+### Patch Changes
+
+- [#7](https://github.com/turbostarter/cli/pull/7) [`49e5510`](https://github.com/turbostarter/cli/commit/49e551002c5b4abd14931670c612cd5b5e6e82ae) Thanks [@Bartek532](https://github.com/Bartek532)! - fix services packages names
+
 ## 1.2.0
 
 ### Minor Changes
