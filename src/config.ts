@@ -1,3 +1,7 @@
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
 export const ServiceType = {
   LOCAL: "local",
   CLOUD: "cloud",
@@ -9,12 +13,6 @@ export const Service = {
 
 export const StorageProvider = {
   S3: "s3",
-} as const;
-
-export const BillingProvider = {
-  STRIPE: "stripe",
-  LEMON_SQUEEZY: "lemon-squeezy",
-  POLAR: "polar",
 } as const;
 
 export const EmailProvider = {
@@ -41,6 +39,18 @@ export const App = {
   WEB: "web",
   MOBILE: "mobile",
   EXTENSION: "extension",
+} as const;
+
+export const BillingProvider = {
+  [App.WEB]: {
+    STRIPE: "stripe",
+    LEMON_SQUEEZY: "lemon-squeezy",
+    POLAR: "polar",
+  },
+  [App.MOBILE]: {
+    REVENUECAT: "revenuecat",
+    SUPERWALL: "superwall",
+  },
 } as const;
 
 export const AnalyticsProvider = {
@@ -84,17 +94,25 @@ export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType];
 export type Service = (typeof Service)[keyof typeof Service];
 export type StorageProvider =
   (typeof StorageProvider)[keyof typeof StorageProvider];
-export type BillingProvider =
-  (typeof BillingProvider)[keyof typeof BillingProvider];
 export type EmailProvider = (typeof EmailProvider)[keyof typeof EmailProvider];
 export type EnvPath = (typeof EnvPath)[keyof typeof EnvPath];
 export type EnvFile = (typeof EnvFile)[keyof typeof EnvFile];
 export type App = (typeof App)[keyof typeof App];
+
+export type BillingProvider = {
+  [K in Mutable<
+    keyof typeof BillingProvider
+  >]: (typeof BillingProvider)[K][keyof (typeof BillingProvider)[K]];
+};
 export type AnalyticsProvider = {
-  [K in App]: (typeof AnalyticsProvider)[K][keyof (typeof AnalyticsProvider)[K]];
+  [K in Mutable<
+    keyof typeof AnalyticsProvider
+  >]: (typeof AnalyticsProvider)[K][keyof (typeof AnalyticsProvider)[K]];
 };
 export type MonitoringProvider = {
-  [K in App]: (typeof MonitoringProvider)[K][keyof (typeof MonitoringProvider)[K]];
+  [K in Mutable<
+    keyof typeof MonitoringProvider
+  >]: (typeof MonitoringProvider)[K][keyof (typeof MonitoringProvider)[K]];
 };
 
 const env = {
@@ -102,19 +120,34 @@ const env = {
     url: "DATABASE_URL",
   },
   billing: {
-    [BillingProvider.STRIPE]: {
-      secretKey: "STRIPE_SECRET_KEY",
-      webhookSecret: "STRIPE_WEBHOOK_SECRET",
+    [App.WEB]: {
+      [BillingProvider[App.WEB].STRIPE]: {
+        secretKey: "STRIPE_SECRET_KEY",
+        webhookSecret: "STRIPE_WEBHOOK_SECRET",
+      },
+      [BillingProvider[App.WEB].LEMON_SQUEEZY]: {
+        apiKey: "LEMON_SQUEEZY_API_KEY",
+        signingSecret: "LEMON_SQUEEZY_SIGNING_SECRET",
+        storeId: "LEMON_SQUEEZY_STORE_ID",
+      },
+      [BillingProvider[App.WEB].POLAR]: {
+        accessToken: "POLAR_ACCESS_TOKEN",
+        webhookSecret: "POLAR_WEBHOOK_SECRET",
+        organizationSlug: "POLAR_ORGANIZATION_SLUG",
+      },
     },
-    [BillingProvider.LEMON_SQUEEZY]: {
-      apiKey: "LEMON_SQUEEZY_API_KEY",
-      signingSecret: "LEMON_SQUEEZY_SIGNING_SECRET",
-      storeId: "LEMON_SQUEEZY_STORE_ID",
-    },
-    [BillingProvider.POLAR]: {
-      accessToken: "POLAR_ACCESS_TOKEN",
-      webhookSecret: "POLAR_WEBHOOK_SECRET",
-      organizationSlug: "POLAR_ORGANIZATION_SLUG",
+    [App.MOBILE]: {
+      [BillingProvider[App.MOBILE].REVENUECAT]: {
+        appleApiKey: "EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY",
+        googleApiKey: "EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY",
+        webhookSecret: "REVENUECAT_WEBHOOK_SECRET",
+        apiKey: "REVENUECAT_API_KEY",
+      },
+      [BillingProvider[App.MOBILE].SUPERWALL]: {
+        appleApiKey: "EXPO_PUBLIC_SUPERWALL_APPLE_API_KEY",
+        googleApiKey: "EXPO_PUBLIC_SUPERWALL_GOOGLE_API_KEY",
+        webhookSecret: "SUPERWALL_WEBHOOK_SECRET",
+      },
     },
   },
   email: {
@@ -233,14 +266,6 @@ const env = {
 export const envInPaths = {
   [EnvPath.ROOT]: [env.db.url],
   [EnvPath.WEB]: [
-    env.billing.stripe.secretKey,
-    env.billing.stripe.webhookSecret,
-    env.billing["lemon-squeezy"].apiKey,
-    env.billing["lemon-squeezy"].signingSecret,
-    env.billing["lemon-squeezy"].storeId,
-    env.billing.polar.accessToken,
-    env.billing.polar.webhookSecret,
-    env.billing.polar.organizationSlug,
     env.email.resend.apiKey,
     env.email.sendgrid.apiKey,
     env.email.plunk.apiKey,
@@ -249,6 +274,17 @@ export const envInPaths = {
     env.email.nodemailer.password,
     env.storage.s3.accessKeyId,
     env.storage.s3.secretAccessKey,
+    env.billing[App.WEB].stripe.secretKey,
+    env.billing[App.WEB].stripe.webhookSecret,
+    env.billing[App.WEB]["lemon-squeezy"].apiKey,
+    env.billing[App.WEB]["lemon-squeezy"].signingSecret,
+    env.billing[App.WEB]["lemon-squeezy"].storeId,
+    env.billing[App.WEB].polar.accessToken,
+    env.billing[App.WEB].polar.webhookSecret,
+    env.billing[App.WEB].polar.organizationSlug,
+    env.billing[App.MOBILE].revenuecat.webhookSecret,
+    env.billing[App.MOBILE].revenuecat.apiKey,
+    env.billing[App.MOBILE].superwall.webhookSecret,
     env.analytics[App.WEB]["google-analytics"].measurementId,
     env.analytics[App.WEB]["google-analytics"].secret,
     env.analytics[App.WEB].mixpanel.token,
@@ -268,6 +304,10 @@ export const envInPaths = {
     env.monitoring[App.WEB].posthog.host,
   ],
   [EnvPath.MOBILE]: [
+    env.billing[App.MOBILE].revenuecat.appleApiKey,
+    env.billing[App.MOBILE].revenuecat.googleApiKey,
+    env.billing[App.MOBILE].superwall.appleApiKey,
+    env.billing[App.MOBILE].superwall.googleApiKey,
     env.analytics[App.MOBILE].mixpanel.token,
     env.analytics[App.MOBILE].posthog.key,
     env.analytics[App.MOBILE].posthog.host,
@@ -300,13 +340,6 @@ export const appSpecificFiles = {
 };
 
 export const providerConfigFiles = {
-  billing: {
-    files: [
-      "packages/billing/src/providers/index.ts",
-      "packages/billing/src/providers/env.ts",
-    ],
-    pattern: new RegExp(`(${Object.values(BillingProvider).join("|")})`, "gi"),
-  },
   email: {
     files: [
       "packages/email/src/providers/index.ts",
@@ -320,6 +353,29 @@ export const providerConfigFiles = {
       "packages/storage/src/providers/env.ts",
     ],
     pattern: new RegExp(`(${Object.values(StorageProvider).join("|")})`, "gi"),
+  },
+  billing: {
+    [App.WEB]: {
+      files: [
+        "packages/billing/web/src/providers/index.ts",
+        "packages/billing/web/src/providers/env.ts",
+      ],
+      pattern: new RegExp(
+        `(${Object.values(BillingProvider[App.WEB]).join("|")})`,
+        "gi",
+      ),
+    },
+    [App.MOBILE]: {
+      files: [
+        "packages/billing/mobile/src/providers/index.ts",
+        "packages/billing/mobile/src/providers/env.ts",
+        "packages/billing/mobile/src/providers/server.ts",
+      ],
+      pattern: new RegExp(
+        `(${Object.values(BillingProvider[App.MOBILE]).join("|")})`,
+        "gi",
+      ),
+    },
   },
   analytics: {
     [App.WEB]: {

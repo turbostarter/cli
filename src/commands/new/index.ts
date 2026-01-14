@@ -84,10 +84,10 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   );
 
   const dbConfig = await getDatabaseConfig();
-  const billingConfig = await getBillingConfig();
   const emailConfig = await getEmailConfig();
-  const storageConfig = await getStorageConfig();
+  const billingConfig = await getBillingConfig(apps);
   const analyticsConfig = await getAnalyticsConfig(apps);
+  const storageConfig = await getStorageConfig();
   const monitoringConfig = await getMonitoringConfig(apps);
 
   const env = {
@@ -106,9 +106,9 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   const projectDir = await cloneRepository(options.cwd, name, apps);
   await prepareEnvironment(projectDir);
   await updateProvidersFiles(projectDir, {
-    billing: billingConfig.provider,
     email: emailConfig.provider,
     storage: storageConfig.provider,
+    billing: billingConfig.providers,
     analytics: analyticsConfig.providers,
     monitoring: monitoringConfig.providers,
   });
@@ -251,9 +251,9 @@ const installDependencies = async (cwd: string) => {
 const updateProvidersFiles = async (
   cwd: string,
   providers: {
-    billing?: BillingProvider;
     email?: EmailProvider;
     storage?: StorageProvider;
+    billing?: Partial<BillingProvider>;
     analytics?: Partial<AnalyticsProvider>;
     monitoring?: Partial<MonitoringProvider>;
   },
@@ -261,14 +261,6 @@ const updateProvidersFiles = async (
   const spinner = ora(`Updating providers files...`).start();
 
   try {
-    if (providers.billing) {
-      await replaceInFiles({
-        cwd,
-        paths: providerConfigFiles.billing.files,
-        pattern: providerConfigFiles.billing.pattern,
-        value: providers.billing,
-      });
-    }
     if (providers.email) {
       await replaceInFiles({
         cwd,
@@ -285,13 +277,35 @@ const updateProvidersFiles = async (
         value: providers.storage,
       });
     }
+    if (providers.billing && Object.keys(providers.billing).length > 0) {
+      await Promise.all(
+        Object.entries(providers.billing).map(([key, value]) =>
+          replaceInFiles({
+            cwd,
+            paths:
+              providerConfigFiles.billing[key as keyof typeof BillingProvider]
+                .files,
+            pattern:
+              providerConfigFiles.billing[key as keyof typeof BillingProvider]
+                .pattern,
+            value,
+          }),
+        ),
+      );
+    }
     if (providers.analytics && Object.keys(providers.analytics).length > 0) {
       await Promise.all(
         Object.entries(providers.analytics).map(([key, value]) =>
           replaceInFiles({
             cwd,
-            paths: providerConfigFiles.analytics[key as App].files,
-            pattern: providerConfigFiles.analytics[key as App].pattern,
+            paths:
+              providerConfigFiles.analytics[
+                key as keyof typeof AnalyticsProvider
+              ].files,
+            pattern:
+              providerConfigFiles.analytics[
+                key as keyof typeof AnalyticsProvider
+              ].pattern,
             value,
           }),
         ),
@@ -302,8 +316,14 @@ const updateProvidersFiles = async (
         Object.entries(providers.monitoring).map(([key, value]) =>
           replaceInFiles({
             cwd,
-            paths: providerConfigFiles.monitoring[key as App].files,
-            pattern: providerConfigFiles.monitoring[key as App].pattern,
+            paths:
+              providerConfigFiles.monitoring[
+                key as keyof typeof MonitoringProvider
+              ].files,
+            pattern:
+              providerConfigFiles.monitoring[
+                key as keyof typeof MonitoringProvider
+              ].pattern,
             value,
           }),
         ),
@@ -311,7 +331,8 @@ const updateProvidersFiles = async (
     }
 
     spinner.succeed("Providers files successfully updated!");
-  } catch {
+  } catch (e) {
+    console.error(e);
     spinner.fail("Failed to update providers files! Please try again.");
     process.exit(1);
   }

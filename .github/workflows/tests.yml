@@ -12,26 +12,28 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 20.x
-
+  NODE_VERSION: 22.x
 jobs:
-  test:
-    name: 🧪 Test
+  checks:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: 🖌️ Format
+            run: pnpm run format
+          - name: 🛻 Lint
+            run: pnpm run lint
+          - name: 📝 Typecheck
+            run: pnpm run typecheck
     steps:
       - name: ✅ Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🔨 Setup
         uses: ./.github/workflows/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: 🖌️ Format
-        run: pnpm run format
-
-      - name: 🛻 Lint
-        run: pnpm run lint
-
-      - name: 🧪 Typecheck
-        run: pnpm run typecheck
+      - name: ▶️ Run
+        run: ${{ matrix.run }}
