@@ -1,15 +1,15 @@
 {
   "name": "@turbostarter/cli",
   "version": "1.2.1",
-  "main": "index.js",
+  "main": "index.mjs",
   "type": "module",
-  "exports": "./dist/index.js",
+  "exports": "./dist/index.mjs",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "bin": {
-    "turbostarter": "./dist/index.js"
+    "turbostarter": "./dist/index.mjs"
   },
   "repository": {
     "url": "https://github.com/turbostarter/cli.git"
@@ -28,9 +28,9 @@
     "browser extension"
   ],
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "start": "node dist/index.mjs",
+    "dev": "tsdown --watch",
+    "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -51,7 +51,7 @@
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-unused-imports": "4.1.4",
     "prettier": "3.3.3",
-    "tsup": "8.3.0",
+    "tsdown": "^0.20.0-beta.3",
     "typescript": "5.9.2",
     "typescript-eslint": "8.46.0"
   },
