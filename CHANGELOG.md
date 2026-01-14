@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.3.0
+
+### Minor Changes
+
+- [`dce95ae`](https://github.com/turbostarter/cli/commit/dce95ae4ae55f6e037aeba60199ca76edd8c07c9) Thanks [@Bartek532](https://github.com/Bartek532)! - introduce support for mobile billing setup
+
 ## 1.2.1
 
 ### Patch Changes
