@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.3.1
+
+### Patch Changes
+
+- [`fc62183`](https://github.com/turbostarter/cli/commit/fc62183d3382332434867a43fdddbfe9e211b2d4) Thanks [@Bartek532](https://github.com/Bartek532)! - fix: make removing files available cross-platform
+
 ## 1.3.0
 
 ### Minor Changes
