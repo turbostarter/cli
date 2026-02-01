@@ -26,7 +26,7 @@ import {
   ServiceType,
 } from "~/config";
 import { handleError, logger, onCancel } from "~/utils";
-import { replaceInFiles } from "~/utils/file";
+import { removePaths, replaceInFiles } from "~/utils/file";
 
 import { validatePrerequisites } from "./prerequisites";
 
@@ -52,7 +52,7 @@ export const newCommand = new Command()
   )
   .action(async (opts: z.infer<typeof newOptionsSchema>) => {
     try {
-      logger.log(`${color.bgRedBright(color.white(" TurboStarter "))}\n`);
+      logger.log(`\n${color.bgRedBright(color.white(" TurboStarter "))}\n`);
 
       const options = newOptionsSchema.parse({
         cwd: path.resolve(opts.cwd),
@@ -205,7 +205,7 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
     });
 
     if (filesToRemove.length) {
-      await execa("rm", ["-rf", ...filesToRemove], { cwd: projectDir });
+      await removePaths({ cwd: projectDir, paths: filesToRemove });
     }
 
     spinner.succeed("Repository successfully pulled!");
@@ -220,7 +220,7 @@ const configureGit = async (cwd: string) => {
   const spinner = ora(`Configuring Git...`).start();
 
   try {
-    await execa("rm", ["-rf", ".git"], { cwd });
+    await removePaths({ cwd, paths: [".git"] });
     await execa("git", ["init"], { cwd });
     await execa("git", ["remote", "add", "upstream", config.repository], {
       cwd,

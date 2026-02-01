@@ -326,9 +326,10 @@ export const appSpecificFiles = {
   [App.WEB]: [],
   [App.MOBILE]: [
     "apps/mobile",
-    "packages/ui/mobile",
     "packages/analytics/mobile",
+    "packages/billing/mobile",
     "packages/monitoring/mobile",
+    "packages/ui/mobile",
     ".github/workflows/publish-mobile.yml",
   ],
   [App.EXTENSION]: [
