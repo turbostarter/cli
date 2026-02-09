@@ -1,7 +1,5 @@
 import { execa } from "execa";
 
-import { logger } from "~/utils/logger";
-
 export function sshUrl(repo: string) {
   return `git@github.com:${repo}`;
 }
@@ -43,8 +41,7 @@ export async function getUpstreamRemoteUrl({ cwd }: { cwd: string }) {
   try {
     const { stdout } = await execa("git remote get-url upstream", { cwd });
     return stdout.trim() || undefined;
-  } catch (error) {
-    logger.error(error);
+  } catch {
     return undefined;
   }
 }

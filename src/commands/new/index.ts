@@ -86,25 +86,10 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   const name = await getName();
   const apps = await getApps();
 
-  logger.info(
-    `\nLet's configure it!\nYou can skip any step by pressing ${color.bold("enter")}.\n`,
-  );
-
-  const dbConfig = await getDatabaseConfig();
-  const emailConfig = await getEmailConfig();
-  const billingConfig = await getBillingConfig(apps);
-  const analyticsConfig = await getAnalyticsConfig(apps);
-  const storageConfig = await getStorageConfig();
-  const monitoringConfig = await getMonitoringConfig(apps);
-
-  const env = {
-    ...("env" in dbConfig ? dbConfig.env : {}),
-    ...billingConfig.env,
-    ...emailConfig.env,
-    ...storageConfig.env,
-    ...analyticsConfig.env,
-    ...monitoringConfig.env,
-  };
+  const shouldConfigureProviders = await getConfigureProvidersStep();
+  const config = shouldConfigureProviders
+    ? await getProvidersConfig(apps)
+    : undefined;
 
   logger.log(
     `\nCreating a new TurboStarter project in ${color.greenBright(join(options.cwd, name))}. \n`,
@@ -113,18 +98,22 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   const projectDir = await cloneRepository(options.cwd, name, apps);
   await configureGit(projectDir);
   await prepareEnvironment(projectDir);
-  await setEnvironmentVariables(projectDir, env);
-  await updateProvidersFiles(projectDir, {
-    email: emailConfig.provider,
-    storage: storageConfig.provider,
-    billing: billingConfig.providers,
-    analytics: analyticsConfig.providers,
-    monitoring: monitoringConfig.providers,
-  });
+
+  if (config) {
+    await setEnvironmentVariables(projectDir, config.env);
+    await updateProvidersFiles(projectDir, {
+      email: config.email.provider,
+      storage: config.storage.provider,
+      billing: config.billing.providers,
+      analytics: config.analytics.providers,
+      monitoring: config.monitoring.providers,
+    });
+  }
+
   await installDependencies(projectDir);
 
   const localServices = [
-    ...(dbConfig.type === ServiceType.LOCAL ? [Service.DB] : []),
+    ...(!config || config.db.type === ServiceType.LOCAL ? [Service.DB] : []),
   ];
 
   if (localServices.length > 0) {
@@ -185,6 +174,56 @@ const getApps = async () => {
       );
     }
   }
+};
+
+const getConfigureProvidersStep = async () => {
+  const result = await prompts(
+    {
+      type: "select",
+      name: "configure",
+      message: "Configure all providers now?",
+      choices: [
+        {
+          title: "Yes, configure now (recommended)",
+          value: true,
+          selected: true,
+        },
+        {
+          title: "No, just let me ship, now!",
+          value: false,
+        },
+      ],
+    },
+    {
+      onCancel,
+    },
+  );
+
+  return Boolean(result.configure);
+};
+
+const getProvidersConfig = async (apps: App[]) => {
+  logger.info(
+    `\nLet's configure it!\nYou can skip any step by pressing ${color.bold("enter")}.\n`,
+  );
+
+  const db = await getDatabaseConfig();
+  const email = await getEmailConfig();
+  const billing = await getBillingConfig(apps);
+  const analytics = await getAnalyticsConfig(apps);
+  const storage = await getStorageConfig();
+  const monitoring = await getMonitoringConfig(apps);
+
+  const env = {
+    ...("env" in db ? db.env : {}),
+    ...billing.env,
+    ...email.env,
+    ...storage.env,
+    ...analytics.env,
+    ...monitoring.env,
+  };
+
+  return { db, email, billing, analytics, storage, monitoring, env };
 };
 
 const cloneRepository = async (cwd: string, name: string, apps: App[]) => {

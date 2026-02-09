@@ -70,7 +70,7 @@ export const validatePrerequisites = async () => {
     await validateGitInstalled();
     await validateNodeInstalled();
     await validatePnpmInstalled();
-    spinner.succeed("All prerequisites are satisfied, let's start! 🚀\n");
+    spinner.succeed("All prerequisites satisfied, let's start! 🚀\n");
   } catch {
     spinner.fail("Failed to check prerequisites.");
     process.exit(1);
