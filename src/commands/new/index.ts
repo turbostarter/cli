@@ -25,7 +25,14 @@ import {
   Service,
   ServiceType,
 } from "~/config";
-import { handleError, logger, onCancel } from "~/utils";
+import {
+  hasSshAccess,
+  httpsUrl,
+  logger,
+  onCancel,
+  setUpstreamRemote,
+  sshUrl,
+} from "~/utils";
 import { removePaths, replaceInFiles } from "~/utils/file";
 
 import { validatePrerequisites } from "./prerequisites";
@@ -68,8 +75,8 @@ export const newCommand = new Command()
         `Problems? ${color.underline("https://turbostarter.dev/docs")}`,
       );
     } catch (error) {
-      logger.break();
-      handleError(error);
+      logger.error(error);
+      process.exit(1);
     }
   });
 
@@ -104,7 +111,9 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   );
 
   const projectDir = await cloneRepository(options.cwd, name, apps);
+  await configureGit(projectDir);
   await prepareEnvironment(projectDir);
+  await setEnvironmentVariables(projectDir, env);
   await updateProvidersFiles(projectDir, {
     email: emailConfig.provider,
     storage: storageConfig.provider,
@@ -112,8 +121,6 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
     analytics: analyticsConfig.providers,
     monitoring: monitoringConfig.providers,
   });
-  await setEnvironmentVariables(projectDir, env);
-  await configureGit(projectDir);
   await installDependencies(projectDir);
 
   const localServices = [
@@ -180,29 +187,22 @@ const getApps = async () => {
   }
 };
 
-const getRepositoryUrl = async (httpsUrl: string): Promise<string> => {
-  try {
-    await execa("ssh", ["-T", "git@github.com"], { timeout: 5000 });
-    return httpsUrl.replace("https://github.com/", "git@github.com:");
-  } catch {
-    return httpsUrl;
-  }
-};
-
 const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
   const spinner = ora(`Cloning repository into ${name}...`).start();
   const projectDir = join(cwd, name);
 
-  const filesToRemove = Object.values(App)
-    .filter((app) => !apps.includes(app))
-    .map((app) => appSpecificFiles[app])
-    .flat();
-
   try {
-    const url = await getRepositoryUrl(config.repository);
+    const url = (await hasSshAccess())
+      ? sshUrl(config.repository)
+      : httpsUrl(config.repository);
     await execa("git", ["clone", "-b", "main", "--single-branch", url, name], {
       cwd,
     });
+
+    const filesToRemove = Object.values(App)
+      .filter((app) => !apps.includes(app))
+      .map((app) => appSpecificFiles[app])
+      .flat();
 
     if (filesToRemove.length) {
       await removePaths({ cwd: projectDir, paths: filesToRemove });
@@ -210,8 +210,9 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
 
     spinner.succeed("Repository successfully pulled!");
     return projectDir;
-  } catch {
+  } catch (error) {
     spinner.fail("Failed to clone TurboStarter! Please try again.");
+    logger.error(error);
     process.exit(1);
   }
 };
@@ -220,17 +221,15 @@ const configureGit = async (cwd: string) => {
   const spinner = ora(`Configuring Git...`).start();
 
   try {
-    await removePaths({ cwd, paths: [".git"] });
-    await execa("git", ["init"], { cwd });
-    await execa("git", ["remote", "add", "upstream", config.repository], {
-      cwd,
-    });
-    await execa("git", ["add", "."], { cwd });
-    await execa("git", ["commit", "-m", "Initial commit"], { cwd });
+    const upstreamUrl = (await hasSshAccess())
+      ? sshUrl(config.repository)
+      : httpsUrl(config.repository);
+    await setUpstreamRemote(upstreamUrl, { cwd });
 
     spinner.succeed("Git successfully configured!");
-  } catch {
+  } catch (error) {
     spinner.fail("Failed to configure Git! Please try again.");
+    logger.error(error);
     process.exit(1);
   }
 };
@@ -242,8 +241,9 @@ const installDependencies = async (cwd: string) => {
     await execa("pnpm", ["install"], { cwd });
 
     spinner.succeed("Dependencies successfully installed!");
-  } catch {
+  } catch (error) {
     spinner.fail("Failed to install dependencies! Please try again.");
+    logger.error(error);
     process.exit(1);
   }
 };
@@ -331,9 +331,9 @@ const updateProvidersFiles = async (
     }
 
     spinner.succeed("Providers files successfully updated!");
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
     spinner.fail("Failed to update providers files! Please try again.");
+    logger.error(error);
     process.exit(1);
   }
 };

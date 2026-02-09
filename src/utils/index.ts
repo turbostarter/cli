@@ -10,10 +10,9 @@ export const getLabel = (value: string) => {
 };
 
 export const onCancel = () => {
-  logger.break();
   logger.error("Operation cancelled.");
   process.exit(0);
 };
 
-export * from "./handle-error";
 export * from "./logger";
+export * from "./upstream";

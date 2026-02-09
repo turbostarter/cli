@@ -17,7 +17,8 @@ export const prepareEnvironment = async (projectDir: string) => {
         );
       }),
     );
-  } catch {
+  } catch (error) {
+    logger.error(error);
     logger.error("Failed to prepare environment!");
     process.exit(1);
   }
@@ -67,7 +68,8 @@ export const setEnvironmentVariables = async (
     }
 
     spinner.succeed("Environment variables successfully set!");
-  } catch {
+  } catch (error) {
+    logger.error(error);
     logger.error("Failed to set environment variables!");
     process.exit(1);
   }

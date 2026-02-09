@@ -116,7 +116,7 @@ export type MonitoringProvider = {
 };
 
 const env = {
-  db: {
+  [Service.DB]: {
     url: "DATABASE_URL",
   },
   billing: {
@@ -436,6 +436,6 @@ export const servicesPackages: Record<Service, string> = {
 
 export const config = {
   name: "TurboStarter",
-  repository: "https://github.com/turbostarter/core.git",
+  repository: "turbostarter/core",
   env,
 } as const;
