@@ -2,6 +2,7 @@
 import { Command } from "commander";
 
 import { newCommand } from "~/commands/new";
+import { projectCommand } from "~/commands/project";
 
 import packageInfo from "../package.json";
 
@@ -21,6 +22,7 @@ function main() {
     );
 
   program.addCommand(newCommand);
+  program.addCommand(projectCommand);
   program.parse();
 }
 

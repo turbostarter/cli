@@ -55,3 +55,12 @@ export async function setUpstreamRemote(url: string, { cwd }: { cwd: string }) {
     await execa("git", ["remote", "add", "upstream", url], { cwd });
   }
 }
+
+export async function isGitClean({ cwd }: { cwd: string }): Promise<boolean> {
+  try {
+    const { stdout } = await execa("git status --porcelain", { cwd });
+    return stdout.trim() === "";
+  } catch {
+    return false;
+  }
+}
