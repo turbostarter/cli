@@ -9,6 +9,7 @@ Run without installing globally:
 ```bash
 npx @turbostarter/cli@latest <command>
 pnpm dlx @turbostarter/cli@latest <command>
+yarn dlx @turbostarter/cli@latest <command>
 bunx @turbostarter/cli@latest <command>
 ```
 
@@ -17,6 +18,7 @@ Or install globally and run:
 ```bash
 npm install -g @turbostarter/cli
 pnpm install -g @turbostarter/cli
+yarn install -g @turbostarter/cli
 bunx install -g @turbostarter/cli
 
 turbostarter <command>
