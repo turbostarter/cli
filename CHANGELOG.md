@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.4.0
+
+### Minor Changes
+
+- [`2e8dd67`](https://github.com/turbostarter/cli/commit/2e8dd67e4bc7ebebc8d01ebead966150d96885a3) Thanks [@Bartek532](https://github.com/Bartek532)! - feat: add project management commands
+
 ## 1.3.2
 
 ### Patch Changes
