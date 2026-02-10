@@ -1,9 +1,11 @@
 import { Command } from "commander";
 import { execa } from "execa";
+import { promises } from "fs";
 import ora from "ora";
 import path, { join } from "path";
 import color from "picocolors";
 import prompts from "prompts";
+import { Project } from "ts-morph";
 import { z } from "zod";
 
 import { getAnalyticsConfig } from "~/commands/new/config/analytics";
@@ -14,18 +16,18 @@ import {
   prepareEnvironment,
   setEnvironmentVariables,
 } from "~/commands/new/config/env";
+import { fileModificationsByMissingApp } from "~/commands/new/config/file-modifications";
 import { getMonitoringConfig } from "~/commands/new/config/monitoring";
 import { getStorageConfig } from "~/commands/new/config/storage";
-import { startServices } from "~/commands/new/services";
 import {
   App,
-  appSpecificFiles,
   config,
   providerConfigFiles,
   Service,
   ServiceType,
 } from "~/config";
 import {
+  enforceSchema,
   hasSshAccess,
   httpsUrl,
   logger,
@@ -33,9 +35,15 @@ import {
   setUpstreamRemote,
   sshUrl,
 } from "~/utils";
-import { removePaths, replaceInFiles } from "~/utils/file";
+import {
+  isJsonFile,
+  isTypescriptFile,
+  removePath,
+  replaceInFiles,
+} from "~/utils/file";
 
 import { validatePrerequisites } from "./prerequisites";
+import { startServices } from "./services";
 
 import type {
   AnalyticsProvider,
@@ -238,14 +246,7 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
       cwd,
     });
 
-    const filesToRemove = Object.values(App)
-      .filter((app) => !apps.includes(app))
-      .map((app) => appSpecificFiles[app])
-      .flat();
-
-    if (filesToRemove.length) {
-      await removePaths({ cwd: projectDir, paths: filesToRemove });
-    }
+    await modifyFilesForMissingApps(projectDir, apps);
 
     spinner.succeed("Repository successfully pulled!");
     return projectDir;
@@ -253,6 +254,48 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
     spinner.fail("Failed to clone TurboStarter! Please try again.");
     logger.error(error);
     process.exit(1);
+  }
+};
+
+const modifyFilesForMissingApps = async (cwd: string, apps: App[]) => {
+  const files = Object.values(App)
+    .filter((app) => !apps.includes(app))
+    .map((app) => fileModificationsByMissingApp[app])
+    .flat();
+
+  if (!files.length) {
+    return;
+  }
+
+  const project = new Project({
+    skipAddingFilesFromTsConfig: true,
+  });
+
+  for (const file of files) {
+    if (file.action === "remove") {
+      await removePath({ cwd, path: file.path });
+    }
+
+    if (file.action === "modify") {
+      if (isJsonFile(file)) {
+        const data = await promises.readFile(join(cwd, file.path), "utf8");
+        const parsed: unknown = JSON.parse(data);
+        if (!enforceSchema(parsed, file.schema)) {
+          continue;
+        }
+        const modified = file.modify(parsed);
+        await promises.writeFile(
+          join(cwd, file.path),
+          JSON.stringify(modified, null, 2),
+        );
+      }
+
+      if (isTypescriptFile(file)) {
+        const sourceFile = project.addSourceFileAtPath(join(cwd, file.path));
+        file.modify(sourceFile);
+        await sourceFile.save();
+      }
+    }
   }
 };
 
@@ -278,6 +321,7 @@ const installDependencies = async (cwd: string) => {
 
   try {
     await execa("pnpm", ["install"], { cwd });
+    await execa("pnpm", ["format:fix"], { cwd });
 
     spinner.succeed("Dependencies successfully installed!");
   } catch (error) {

@@ -9,7 +9,7 @@ export const ServiceType = {
 
 export const Service = {
   DB: "db",
-};
+} as const;
 
 export const StorageProvider = {
   S3: "s3",
@@ -319,24 +319,6 @@ export const envInPaths = {
     env.analytics[App.EXTENSION].posthog.key,
     env.analytics[App.EXTENSION].posthog.host,
     env.monitoring[App.EXTENSION].sentry.dsn,
-  ],
-};
-
-export const appSpecificFiles = {
-  [App.WEB]: [],
-  [App.MOBILE]: [
-    "apps/mobile",
-    "packages/analytics/mobile",
-    "packages/billing/mobile",
-    "packages/monitoring/mobile",
-    "packages/ui/mobile",
-    ".github/workflows/publish-mobile.yml",
-  ],
-  [App.EXTENSION]: [
-    "apps/extension",
-    "packages/analytics/extension",
-    "packages/monitoring/extension",
-    ".github/workflows/publish-extension.yml",
   ],
 };
 

@@ -1,6 +1,6 @@
 import prompts from "prompts";
 
-import { config, ServiceType } from "~/config";
+import { config, Service, ServiceType } from "~/config";
 import { onCancel } from "~/utils";
 
 const getDatabaseCloudConfig = async () => {
@@ -8,7 +8,7 @@ const getDatabaseCloudConfig = async () => {
     [
       {
         type: "text",
-        name: config.env.db.url,
+        name: config.env[Service.DB].url,
         message: "Enter your database URL",
       },
     ],

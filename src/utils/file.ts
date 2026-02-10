@@ -1,19 +1,99 @@
 import { promises } from "fs";
+import _ from "lodash";
 import { join } from "path";
 
-export const removePaths = async ({
+import type { SourceFile } from "ts-morph";
+import type * as z from "zod/v4/core";
+
+type BivariantCallback<TInput, TOutput> = {
+  bivarianceHack(input: TInput): TOutput;
+}["bivarianceHack"];
+
+type GeneralFile = {
+  path: string;
+} & {
+  action: "remove";
+};
+
+type JsonFile<Schema extends z.$ZodType, Data = z.infer<Schema>> = {
+  path: `${string}.json`;
+} & (
+  | {
+      action: "remove";
+    }
+  | {
+      action: "modify";
+      schema: Schema;
+      modify: BivariantCallback<Data, unknown>;
+    }
+);
+
+type TypescriptFile = {
+  path: `${string}.ts` | `${string}.tsx`;
+} & (
+  | {
+      action: "remove";
+    }
+  | {
+      action: "modify";
+      modify: (file: SourceFile) => void;
+    }
+);
+
+type Directory = {
+  path: string;
+} & {
+  action: "remove";
+};
+
+export type File = GeneralFile | TypescriptFile | JsonFile<z.$ZodType, unknown>;
+export type Entry = File | Directory;
+
+export function file<S extends z.$ZodType>(file: JsonFile<S>): JsonFile<S>;
+export function file<T extends TypescriptFile>(file: T): T;
+export function file<F extends GeneralFile>(file: F): F;
+export function file(file: File) {
+  return file;
+}
+
+export const directory = <D extends Directory>(directory: D) => directory;
+
+export const isJsonFile = (
+  file: Entry,
+): file is JsonFile<z.$ZodType, unknown> => file.path.endsWith(".json");
+
+export const isTypescriptFile = (file: Entry): file is TypescriptFile =>
+  [".ts", ".tsx"].some((extension) => file.path.endsWith(extension));
+
+export const removePath = async ({
   cwd,
-  paths,
+  path,
 }: {
   cwd: string;
-  paths: string[];
+  path: string;
 }) => {
-  await Promise.all(
-    paths.map(async (path) => {
-      const fullPath = join(cwd, path);
-      await promises.rm(fullPath, { recursive: true, force: true });
-    }),
-  );
+  const fullPath = join(cwd, path);
+  await promises.rm(fullPath, { recursive: true, force: true });
+};
+
+export const removeDependency = <T extends Record<string, unknown>>(
+  data: T,
+  dependency: string,
+) => {
+  return _.transform(
+    data,
+    (result: Record<string, unknown>, value, key) => {
+      if (["dependencies", "devDependencies"].includes(key)) {
+        result[key] =
+          value && typeof value === "object"
+            ? _.omit(value, dependency)
+            : value;
+      } else {
+        result[key] = value;
+      }
+    },
+    {},
+  ) as T;
 };
 
 export const replaceInFile = async ({
