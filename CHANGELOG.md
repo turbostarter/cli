@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.3.2
+
+### Patch Changes
+
+- [`99814e0`](https://github.com/turbostarter/cli/commit/99814e07bf5192878bef8e389edbc002bdbf0ca8) Thanks [@Bartek532](https://github.com/Bartek532)! - feat: enhance file modification logic for configured apps
+
 ## 1.3.1
 
 ### Patch Changes
