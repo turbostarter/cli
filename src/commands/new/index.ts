@@ -62,7 +62,7 @@ export const newCommand = new Command()
   .description("create a new TurboStarter project")
   .option(
     "-c, --cwd <cwd>",
-    "the working directory. defaults to the current directory.",
+    "the working directory. Defaults to the current directory.",
     process.cwd(),
   )
   .action(async (opts: z.infer<typeof newOptionsSchema>) => {
@@ -104,7 +104,7 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   );
 
   const projectDir = await cloneRepository(options.cwd, name, apps);
-  await configureGit(projectDir);
+  await configureGit(projectDir, apps);
   await prepareEnvironment(projectDir);
 
   if (config) {
@@ -299,14 +299,27 @@ const modifyFilesForMissingApps = async (cwd: string, apps: App[]) => {
   }
 };
 
-const configureGit = async (cwd: string) => {
+const configureGit = async (cwd: string, apps: App[]) => {
   const spinner = ora(`Configuring Git...`).start();
+  const missingApps = Object.values(App).filter((app) => !apps.includes(app));
 
   try {
     const upstreamUrl = (await hasSshAccess())
       ? sshUrl(config.repository)
       : httpsUrl(config.repository);
     await setUpstreamRemote(upstreamUrl, { cwd });
+
+    if (missingApps.length > 0) {
+      await execa(
+        "git",
+        [
+          "commit",
+          "-am",
+          "chore: remove unnecessary files after project initialization",
+        ],
+        { cwd },
+      );
+    }
 
     spinner.succeed("Git successfully configured!");
   } catch (error) {

@@ -23,5 +23,23 @@ export const enforceSchema = <Schema extends z.ZodType>(
   return schema.safeParse(data).success;
 };
 
+export const getErrorOutput = (error: unknown) => {
+  if (error instanceof Error && "stderr" in error) {
+    const stderr = String((error as { stderr: unknown }).stderr);
+    if (stderr) {
+      return stderr;
+    }
+  }
+
+  if (error instanceof Error && "stdout" in error) {
+    const stdout = String((error as { stdout: unknown }).stdout);
+    if (stdout) {
+      return stdout;
+    }
+  }
+
+  return error instanceof Error ? error.message : String(error);
+};
+
 export * from "./logger";
 export * from "./upstream";
