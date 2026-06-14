@@ -14,6 +14,7 @@ import { getDatabaseConfig } from "~/commands/new/config/db";
 import { getEmailConfig } from "~/commands/new/config/email";
 import {
   prepareEnvironment,
+  setEnvironmentVariable,
   setEnvironmentVariables,
 } from "~/commands/new/config/env";
 import { fileModificationsByMissingApp } from "~/commands/new/config/file-modifications";
@@ -21,7 +22,7 @@ import { getMonitoringConfig } from "~/commands/new/config/monitoring";
 import { getStorageConfig } from "~/commands/new/config/storage";
 import {
   App,
-  config,
+  config as appConfig,
   providerConfigFiles,
   Service,
   ServiceType,
@@ -33,6 +34,7 @@ import {
   logger,
   onCancel,
   setUpstreamRemote,
+  slugify,
   sshUrl,
 } from "~/utils";
 import {
@@ -91,7 +93,8 @@ export const newCommand = new Command()
 const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   await validatePrerequisites();
 
-  const name = await getName();
+  const projectName = await getName();
+  const name = slugify(projectName);
   const apps = await getApps();
 
   const shouldConfigureProviders = await getConfigureProvidersStep();
@@ -106,6 +109,11 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
   const projectDir = await cloneRepository(options.cwd, name, apps);
   await configureGit(projectDir, apps);
   await prepareEnvironment(projectDir);
+  await setEnvironmentVariable(
+    projectDir,
+    appConfig.env.productName,
+    projectName,
+  );
 
   if (config) {
     await setEnvironmentVariables(projectDir, config.env);
@@ -137,8 +145,17 @@ const getName = async () => {
       type: "text",
       name: "name",
       message: "Enter your project name.",
-      validate: (value: string) =>
-        value.length > 0 ? true : "Name is required!",
+      validate: (value: string) => {
+        if (!value.trim()) {
+          return "Name is required!";
+        }
+
+        if (!slugify(value)) {
+          return "Name must contain at least one letter or number.";
+        }
+
+        return true;
+      },
     },
     {
       onCancel,
@@ -240,8 +257,8 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
 
   try {
     const url = (await hasSshAccess())
-      ? sshUrl(config.repository)
-      : httpsUrl(config.repository);
+      ? sshUrl(appConfig.repository)
+      : httpsUrl(appConfig.repository);
     await execa("git", ["clone", "-b", "main", "--single-branch", url, name], {
       cwd,
     });
@@ -305,8 +322,8 @@ const configureGit = async (cwd: string, apps: App[]) => {
 
   try {
     const upstreamUrl = (await hasSshAccess())
-      ? sshUrl(config.repository)
-      : httpsUrl(config.repository);
+      ? sshUrl(appConfig.repository)
+      : httpsUrl(appConfig.repository);
     await setUpstreamRemote(upstreamUrl, { cwd });
 
     if (missingApps.length > 0) {

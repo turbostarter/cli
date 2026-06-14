@@ -11,6 +11,14 @@ export const getLabel = (value: string) => {
     .join(" ");
 };
 
+export const slugify = (value: string) => {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
 export const onCancel = () => {
   logger.error("Operation cancelled.");
   process.exit(0);

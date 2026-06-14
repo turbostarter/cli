@@ -116,6 +116,7 @@ export type MonitoringProvider = {
 };
 
 const env = {
+  productName: "PRODUCT_NAME",
   [Service.DB]: {
     url: "DATABASE_URL",
   },
@@ -264,7 +265,7 @@ const env = {
 } as const;
 
 export const envInPaths = {
-  [EnvPath.ROOT]: [env.db.url],
+  [EnvPath.ROOT]: [env.productName, env.db.url],
   [EnvPath.WEB]: [
     env.email.resend.apiKey,
     env.email.sendgrid.apiKey,
