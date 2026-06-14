@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.5.0
+
+### Minor Changes
+
+- [`97fc656`](https://github.com/turbostarter/cli/commit/97fc6566770c631f90b6390a75ae5a6640c79a78) Thanks [@Bartek532](https://github.com/Bartek532)! - Improve `new` command setup with product name configuration, shared environment prefill across provider prompts, and Dodo Payments as a web billing provider option.
+
 ## 1.4.0
 
 ### Minor Changes
