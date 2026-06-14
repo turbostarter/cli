@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 20.x
+  NODE_VERSION: 24.x
 
 jobs:
   tests:
@@ -25,7 +25,7 @@ jobs:
       pull-requests: write
     steps:
       - name: ✅ Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔨 Setup
         uses: ./.github/workflows/setup
@@ -37,7 +37,7 @@ jobs:
 
       - name: 🚀 Create release
         id: changeset
-        uses: changesets/action@v1.4.1
+        uses: changesets/action@v1.9.0
         with:
           commit: "chore(release): 🚀 version packages"
           title: "chore(release): 🚀 version packages"

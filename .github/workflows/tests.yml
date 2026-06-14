@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 22.x
+  NODE_VERSION: 24.x
 jobs:
   checks:
     name: ${{ matrix.name }}
@@ -28,7 +28,7 @@ jobs:
             run: pnpm run typecheck
     steps:
       - name: ✅ Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: 🔨 Setup
         uses: ./.github/workflows/setup
