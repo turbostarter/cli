@@ -232,12 +232,25 @@ const getProvidersConfig = async (apps: App[]) => {
     `\nLet's configure it!\nYou can skip any step by pressing ${color.bold("enter")}.\n`,
   );
 
-  const db = await getDatabaseConfig();
-  const email = await getEmailConfig();
-  const billing = await getBillingConfig(apps);
-  const analytics = await getAnalyticsConfig(apps);
-  const storage = await getStorageConfig();
-  const monitoring = await getMonitoringConfig(apps);
+  const configuredEnv: Record<string, string> = {};
+
+  const db = await getDatabaseConfig(configuredEnv);
+  Object.assign(configuredEnv, "env" in db ? db.env : {});
+
+  const email = await getEmailConfig(configuredEnv);
+  Object.assign(configuredEnv, email.env);
+
+  const billing = await getBillingConfig(apps, configuredEnv);
+  Object.assign(configuredEnv, billing.env);
+
+  const analytics = await getAnalyticsConfig(apps, configuredEnv);
+  Object.assign(configuredEnv, analytics.env);
+
+  const storage = await getStorageConfig(configuredEnv);
+  Object.assign(configuredEnv, storage.env);
+
+  const monitoring = await getMonitoringConfig(apps, configuredEnv);
+  Object.assign(configuredEnv, monitoring.env);
 
   const env = {
     ...("env" in db ? db.env : {}),

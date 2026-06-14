@@ -26,6 +26,7 @@ const getBillingWebProvider = async (): Promise<{
 
 const getBillingWebProviderConfig = async (
   provider: BillingProviderType[typeof App.WEB],
+  configuredEnv: Record<string, string>,
 ) => {
   switch (provider) {
     case BillingProvider[App.WEB].STRIPE:
@@ -35,11 +36,14 @@ const getBillingWebProviderConfig = async (
             type: "text",
             name: config.env.billing[App.WEB].stripe.secretKey,
             message: "Enter your Stripe secret key",
+            initial: configuredEnv[config.env.billing[App.WEB].stripe.secretKey],
           },
           {
             type: "text",
             name: config.env.billing[App.WEB].stripe.webhookSecret,
             message: "Enter your Stripe webhook secret",
+            initial:
+              configuredEnv[config.env.billing[App.WEB].stripe.webhookSecret],
           },
         ],
         { onCancel },
@@ -51,16 +55,24 @@ const getBillingWebProviderConfig = async (
             type: "text",
             name: config.env.billing[App.WEB]["lemon-squeezy"].storeId,
             message: "Enter your Lemon Squeezy store ID",
+            initial:
+              configuredEnv[config.env.billing[App.WEB]["lemon-squeezy"].storeId],
           },
           {
             type: "text",
             name: config.env.billing[App.WEB]["lemon-squeezy"].apiKey,
             message: "Enter your Lemon Squeezy API key",
+            initial:
+              configuredEnv[config.env.billing[App.WEB]["lemon-squeezy"].apiKey],
           },
           {
             type: "text",
             name: config.env.billing[App.WEB]["lemon-squeezy"].signingSecret,
             message: "Enter your Lemon Squeezy signing secret",
+            initial:
+              configuredEnv[
+                config.env.billing[App.WEB]["lemon-squeezy"].signingSecret
+              ],
           },
         ],
         { onCancel },
@@ -72,16 +84,22 @@ const getBillingWebProviderConfig = async (
             type: "text",
             name: config.env.billing[App.WEB].polar.accessToken,
             message: "Enter your Polar access token",
+            initial:
+              configuredEnv[config.env.billing[App.WEB].polar.accessToken],
           },
           {
             type: "text",
             name: config.env.billing[App.WEB].polar.webhookSecret,
             message: "Enter your Polar webhook secret",
+            initial:
+              configuredEnv[config.env.billing[App.WEB].polar.webhookSecret],
           },
           {
             type: "text",
             name: config.env.billing[App.WEB].polar.organizationSlug,
             message: "Enter your Polar organization slug",
+            initial:
+              configuredEnv[config.env.billing[App.WEB].polar.organizationSlug],
           },
         ],
         { onCancel },
@@ -89,9 +107,11 @@ const getBillingWebProviderConfig = async (
   }
 };
 
-export const getBillingWebConfig = async () => {
+export const getBillingWebConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getBillingWebProvider();
-  const env = await getBillingWebProviderConfig(provider);
+  const env = await getBillingWebProviderConfig(provider, configuredEnv);
 
   return { provider, env };
 };

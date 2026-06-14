@@ -28,6 +28,7 @@ const getMonitoringExtensionProvider = async (): Promise<{
 
 const getMonitoringExtensionProviderConfig = async (
   provider: MonitoringProvider[typeof App.EXTENSION],
+  configuredEnv: Record<string, string>,
 ) => {
   switch (provider) {
     case MonitoringProvider[App.EXTENSION].SENTRY:
@@ -37,6 +38,8 @@ const getMonitoringExtensionProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.EXTENSION].sentry.dsn,
             message: "Enter your Sentry DSN",
+            initial:
+              configuredEnv[config.env.monitoring[App.EXTENSION].sentry.dsn],
           },
         ],
         { onCancel },
@@ -48,12 +51,16 @@ const getMonitoringExtensionProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.EXTENSION].posthog.key,
             message: "Enter your PostHog key",
+            initial:
+              configuredEnv[config.env.monitoring[App.EXTENSION].posthog.key],
           },
           {
             type: "text",
             name: config.env.monitoring[App.EXTENSION].posthog.host,
             message: "Enter your PostHog host",
-            initial: "https://us.posthog.com",
+            initial:
+              configuredEnv[config.env.monitoring[App.EXTENSION].posthog.host] ??
+              "https://us.posthog.com",
           },
         ],
         { onCancel },
@@ -61,9 +68,14 @@ const getMonitoringExtensionProviderConfig = async (
   }
 };
 
-export const getMonitoringExtensionConfig = async () => {
+export const getMonitoringExtensionConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getMonitoringExtensionProvider();
-  const env = await getMonitoringExtensionProviderConfig(provider);
+  const env = await getMonitoringExtensionProviderConfig(
+    provider,
+    configuredEnv,
+  );
 
   return { provider, env };
 };

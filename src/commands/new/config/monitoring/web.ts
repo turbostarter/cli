@@ -26,6 +26,7 @@ const getMonitoringWebProvider = async (): Promise<{
 
 const getMonitoringWebProviderConfig = async (
   provider: MonitoringProvider[typeof App.WEB],
+  configuredEnv: Record<string, string>,
 ) => {
   switch (provider) {
     case MonitoringProvider[App.WEB].SENTRY:
@@ -35,6 +36,7 @@ const getMonitoringWebProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.WEB].sentry.dsn,
             message: "Enter your Sentry DSN",
+            initial: configuredEnv[config.env.monitoring[App.WEB].sentry.dsn],
           },
         ],
         { onCancel },
@@ -46,12 +48,15 @@ const getMonitoringWebProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.WEB].posthog.key,
             message: "Enter your PostHog key",
+            initial: configuredEnv[config.env.monitoring[App.WEB].posthog.key],
           },
           {
             type: "text",
             name: config.env.monitoring[App.WEB].posthog.host,
             message: "Enter your PostHog host",
-            initial: "https://us.posthog.com",
+            initial:
+              configuredEnv[config.env.monitoring[App.WEB].posthog.host] ??
+              "https://us.posthog.com",
           },
         ],
         { onCancel },
@@ -59,9 +64,11 @@ const getMonitoringWebProviderConfig = async (
   }
 };
 
-export const getMonitoringWebConfig = async () => {
+export const getMonitoringWebConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getMonitoringWebProvider();
-  const env = await getMonitoringWebProviderConfig(provider);
+  const env = await getMonitoringWebProviderConfig(provider, configuredEnv);
 
   return { provider, env };
 };

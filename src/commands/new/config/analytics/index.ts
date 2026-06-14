@@ -6,24 +6,30 @@ import { getAnalyticsWebConfig } from "./web";
 
 import type { AnalyticsProvider } from "~/config";
 
-export const getAnalyticsConfig = async (apps: App[]) => {
+export const getAnalyticsConfig = async (
+  apps: App[],
+  configuredEnv: Record<string, string>,
+) => {
   const providers: Partial<AnalyticsProvider> = {};
   const env: Record<string, string> = {};
 
   if (apps.includes(App.WEB)) {
-    const { provider, env: webEnv } = await getAnalyticsWebConfig();
+    const { provider, env: webEnv } =
+      await getAnalyticsWebConfig(configuredEnv);
     providers[App.WEB] = provider;
     Object.assign(env, webEnv);
   }
 
   if (apps.includes(App.MOBILE)) {
-    const { provider, env: mobileEnv } = await getAnalyticsMobileConfig();
+    const { provider, env: mobileEnv } =
+      await getAnalyticsMobileConfig(configuredEnv);
     providers[App.MOBILE] = provider;
     Object.assign(env, mobileEnv);
   }
 
   if (apps.includes(App.EXTENSION)) {
-    const { provider, env: extensionEnv } = await getAnalyticsExtensionConfig();
+    const { provider, env: extensionEnv } =
+      await getAnalyticsExtensionConfig(configuredEnv);
     providers[App.EXTENSION] = provider;
     Object.assign(env, extensionEnv);
   }

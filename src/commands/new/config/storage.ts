@@ -25,35 +25,40 @@ const getStorageProvider = async (): Promise<{
   );
 };
 
-const getStorageProviderConfig = () => {
+const getStorageProviderConfig = (configuredEnv: Record<string, string>) => {
   return prompts(
     [
       {
         type: "text",
         name: config.env.storage.s3.region,
         message: "Enter your S3 region",
-        initial: "us-east-1",
+        initial: configuredEnv[config.env.storage.s3.region] ?? "us-east-1",
       },
       {
         type: "text",
         name: config.env.storage.s3.endpoint,
         message: "Enter your S3 endpoint",
-        initial: "https://s3.amazonaws.com",
+        initial:
+          configuredEnv[config.env.storage.s3.endpoint] ??
+          "https://s3.amazonaws.com",
       },
       {
         type: "text",
         name: config.env.storage.s3.bucket,
         message: "Enter your default S3 bucket name",
+        initial: configuredEnv[config.env.storage.s3.bucket],
       },
       {
         type: "text",
         name: config.env.storage.s3.accessKeyId,
         message: "Enter your S3 access key ID",
+        initial: configuredEnv[config.env.storage.s3.accessKeyId],
       },
       {
         type: "text",
         name: config.env.storage.s3.secretAccessKey,
         message: "Enter your S3 secret access key",
+        initial: configuredEnv[config.env.storage.s3.secretAccessKey],
       },
     ],
     {
@@ -62,9 +67,11 @@ const getStorageProviderConfig = () => {
   );
 };
 
-export const getStorageConfig = async () => {
+export const getStorageConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getStorageProvider();
-  const env = await getStorageProviderConfig();
+  const env = await getStorageProviderConfig(configuredEnv);
 
   return { provider, env };
 };

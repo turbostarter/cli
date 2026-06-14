@@ -28,6 +28,7 @@ const getAnalyticsMobileProvider = async (): Promise<{
 
 const getAnalyticsMobileProviderConfig = async (
   provider: AnalyticsProvider[typeof App.MOBILE],
+  configuredEnv: Record<string, string>,
 ) => {
   switch (provider) {
     case AnalyticsProvider[App.MOBILE].GOOGLE_ANALYTICS:
@@ -42,6 +43,8 @@ const getAnalyticsMobileProviderConfig = async (
             type: "text",
             name: config.env.analytics[App.MOBILE].mixpanel.token,
             message: "Enter your Mixpanel token",
+            initial:
+              configuredEnv[config.env.analytics[App.MOBILE].mixpanel.token],
           },
         ],
         { onCancel },
@@ -53,12 +56,15 @@ const getAnalyticsMobileProviderConfig = async (
             type: "text",
             name: config.env.analytics[App.MOBILE].posthog.key,
             message: "Enter your PostHog key",
+            initial: configuredEnv[config.env.analytics[App.MOBILE].posthog.key],
           },
           {
             type: "text",
             name: config.env.analytics[App.MOBILE].posthog.host,
             message: "Enter your PostHog host",
-            initial: "https://us.posthog.com",
+            initial:
+              configuredEnv[config.env.analytics[App.MOBILE].posthog.host] ??
+              "https://us.posthog.com",
           },
         ],
         { onCancel },
@@ -66,9 +72,11 @@ const getAnalyticsMobileProviderConfig = async (
   }
 };
 
-export const getAnalyticsMobileConfig = async () => {
+export const getAnalyticsMobileConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getAnalyticsMobileProvider();
-  const env = await getAnalyticsMobileProviderConfig(provider);
+  const env = await getAnalyticsMobileProviderConfig(provider, configuredEnv);
 
   return { provider, env };
 };

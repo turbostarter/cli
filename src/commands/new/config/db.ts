@@ -3,13 +3,18 @@ import prompts from "prompts";
 import { config, Service, ServiceType } from "~/config";
 import { onCancel } from "~/utils";
 
-const getDatabaseCloudConfig = async () => {
+const getDatabaseCloudConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
+  const urlKey = config.env[Service.DB].url;
+
   return prompts(
     [
       {
         type: "text",
-        name: config.env[Service.DB].url,
+        name: urlKey,
         message: "Enter your database URL",
+        initial: configuredEnv[urlKey],
       },
     ],
     {
@@ -18,7 +23,9 @@ const getDatabaseCloudConfig = async () => {
   );
 };
 
-export const getDatabaseConfig = async () => {
+export const getDatabaseConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const response = await prompts(
     [
       {
@@ -44,7 +51,7 @@ export const getDatabaseConfig = async () => {
   );
 
   if (response.type === ServiceType.CLOUD) {
-    const dbConfig = await getDatabaseCloudConfig();
+    const dbConfig = await getDatabaseCloudConfig(configuredEnv);
 
     return { ...response, env: dbConfig };
   }

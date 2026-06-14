@@ -26,6 +26,7 @@ const getBillingMobileProvider = async (): Promise<{
 
 const getBillingMobileProviderConfig = async (
   provider: BillingProviderType[typeof App.MOBILE],
+  configuredEnv: Record<string, string>,
 ) => {
   switch (provider) {
     case BillingProvider[App.MOBILE].REVENUECAT:
@@ -35,21 +36,35 @@ const getBillingMobileProviderConfig = async (
             type: "text",
             name: config.env.billing[App.MOBILE].revenuecat.appleApiKey,
             message: "Enter your RevenueCat Apple API key",
+            initial:
+              configuredEnv[
+                config.env.billing[App.MOBILE].revenuecat.appleApiKey
+              ],
           },
           {
             type: "text",
             name: config.env.billing[App.MOBILE].revenuecat.googleApiKey,
             message: "Enter your RevenueCat Google API key",
+            initial:
+              configuredEnv[
+                config.env.billing[App.MOBILE].revenuecat.googleApiKey
+              ],
           },
           {
             type: "text",
             name: config.env.billing[App.MOBILE].revenuecat.webhookSecret,
             message: "Enter your RevenueCat webhook secret",
+            initial:
+              configuredEnv[
+                config.env.billing[App.MOBILE].revenuecat.webhookSecret
+              ],
           },
           {
             type: "text",
             name: config.env.billing[App.MOBILE].revenuecat.apiKey,
             message: "Enter your RevenueCat API key",
+            initial:
+              configuredEnv[config.env.billing[App.MOBILE].revenuecat.apiKey],
           },
         ],
         { onCancel },
@@ -61,16 +76,28 @@ const getBillingMobileProviderConfig = async (
             type: "text",
             name: config.env.billing[App.MOBILE].superwall.appleApiKey,
             message: "Enter your Superwall Apple API key",
+            initial:
+              configuredEnv[
+                config.env.billing[App.MOBILE].superwall.appleApiKey
+              ],
           },
           {
             type: "text",
             name: config.env.billing[App.MOBILE].superwall.googleApiKey,
             message: "Enter your Superwall Google API key",
+            initial:
+              configuredEnv[
+                config.env.billing[App.MOBILE].superwall.googleApiKey
+              ],
           },
           {
             type: "text",
             name: config.env.billing[App.MOBILE].superwall.webhookSecret,
             message: "Enter your Superwall webhook secret",
+            initial:
+              configuredEnv[
+                config.env.billing[App.MOBILE].superwall.webhookSecret
+              ],
           },
         ],
         { onCancel },
@@ -78,9 +105,11 @@ const getBillingMobileProviderConfig = async (
   }
 };
 
-export const getBillingMobileConfig = async () => {
+export const getBillingMobileConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getBillingMobileProvider();
-  const env = await getBillingMobileProviderConfig(provider);
+  const env = await getBillingMobileProviderConfig(provider, configuredEnv);
 
   return { provider, env };
 };

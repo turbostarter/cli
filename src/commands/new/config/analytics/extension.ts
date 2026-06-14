@@ -28,6 +28,7 @@ const getAnalyticsExtensionProvider = async (): Promise<{
 
 const getAnalyticsExtensionProviderConfig = async (
   provider: AnalyticsProvider[typeof App.EXTENSION],
+  configuredEnv: Record<string, string>,
 ) => {
   switch (provider) {
     case AnalyticsProvider[App.EXTENSION].GOOGLE_ANALYTICS:
@@ -38,12 +39,21 @@ const getAnalyticsExtensionProviderConfig = async (
             name: config.env.analytics[App.EXTENSION]["google-analytics"]
               .measurementId,
             message: "Enter your Google Analytics measurement ID",
+            initial:
+              configuredEnv[
+                config.env.analytics[App.EXTENSION]["google-analytics"]
+                  .measurementId
+              ],
           },
           {
             type: "text",
             name: config.env.analytics[App.EXTENSION]["google-analytics"]
               .secret,
             message: "Enter your Google Analytics secret",
+            initial:
+              configuredEnv[
+                config.env.analytics[App.EXTENSION]["google-analytics"].secret
+              ],
           },
         ],
         { onCancel },
@@ -55,12 +65,16 @@ const getAnalyticsExtensionProviderConfig = async (
             type: "text",
             name: config.env.analytics[App.EXTENSION].posthog.key,
             message: "Enter your PostHog key",
+            initial:
+              configuredEnv[config.env.analytics[App.EXTENSION].posthog.key],
           },
           {
             type: "text",
             name: config.env.analytics[App.EXTENSION].posthog.host,
             message: "Enter your PostHog host",
-            initial: "https://us.posthog.com",
+            initial:
+              configuredEnv[config.env.analytics[App.EXTENSION].posthog.host] ??
+              "https://us.posthog.com",
           },
         ],
         { onCancel },
@@ -68,9 +82,14 @@ const getAnalyticsExtensionProviderConfig = async (
   }
 };
 
-export const getAnalyticsExtensionConfig = async () => {
+export const getAnalyticsExtensionConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getAnalyticsExtensionProvider();
-  const env = await getAnalyticsExtensionProviderConfig(provider);
+  const env = await getAnalyticsExtensionProviderConfig(
+    provider,
+    configuredEnv,
+  );
 
   return { provider, env };
 };

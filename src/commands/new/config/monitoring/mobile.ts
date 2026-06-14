@@ -28,6 +28,7 @@ const getMonitoringMobileProvider = async (): Promise<{
 
 const getMonitoringMobileProviderConfig = async (
   provider: MonitoringProvider[typeof App.MOBILE],
+  configuredEnv: Record<string, string>,
 ) => {
   switch (provider) {
     case MonitoringProvider[App.MOBILE].SENTRY:
@@ -37,6 +38,7 @@ const getMonitoringMobileProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.MOBILE].sentry.dsn,
             message: "Enter your Sentry DSN",
+            initial: configuredEnv[config.env.monitoring[App.MOBILE].sentry.dsn],
           },
         ],
         { onCancel },
@@ -48,12 +50,15 @@ const getMonitoringMobileProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.MOBILE].posthog.key,
             message: "Enter your PostHog key",
+            initial: configuredEnv[config.env.monitoring[App.MOBILE].posthog.key],
           },
           {
             type: "text",
             name: config.env.monitoring[App.MOBILE].posthog.host,
             message: "Enter your PostHog host",
-            initial: "https://us.posthog.com",
+            initial:
+              configuredEnv[config.env.monitoring[App.MOBILE].posthog.host] ??
+              "https://us.posthog.com",
           },
         ],
         { onCancel },
@@ -61,9 +66,11 @@ const getMonitoringMobileProviderConfig = async (
   }
 };
 
-export const getMonitoringMobileConfig = async () => {
+export const getMonitoringMobileConfig = async (
+  configuredEnv: Record<string, string>,
+) => {
   const { provider } = await getMonitoringMobileProvider();
-  const env = await getMonitoringMobileProviderConfig(provider);
+  const env = await getMonitoringMobileProviderConfig(provider, configuredEnv);
 
   return { provider, env };
 };
