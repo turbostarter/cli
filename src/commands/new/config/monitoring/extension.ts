@@ -59,8 +59,9 @@ const getMonitoringExtensionProviderConfig = async (
             name: config.env.monitoring[App.EXTENSION].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.monitoring[App.EXTENSION].posthog.host] ??
-              "https://us.posthog.com",
+              configuredEnv[
+                config.env.monitoring[App.EXTENSION].posthog.host
+              ] ?? "https://us.posthog.com",
           },
         ],
         { onCancel },

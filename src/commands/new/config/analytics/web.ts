@@ -61,7 +61,8 @@ const getAnalyticsWebProviderConfig = async (
             type: "text",
             name: config.env.analytics[App.WEB].mixpanel.token,
             message: "Enter your Mixpanel token",
-            initial: configuredEnv[config.env.analytics[App.WEB].mixpanel.token],
+            initial:
+              configuredEnv[config.env.analytics[App.WEB].mixpanel.token],
           },
         ],
         { onCancel },
@@ -74,7 +75,9 @@ const getAnalyticsWebProviderConfig = async (
             name: config.env.analytics[App.WEB]["open-panel"].clientId,
             message: "Enter your OpenPanel client ID",
             initial:
-              configuredEnv[config.env.analytics[App.WEB]["open-panel"].clientId],
+              configuredEnv[
+                config.env.analytics[App.WEB]["open-panel"].clientId
+              ],
           },
           {
             type: "text",
@@ -93,7 +96,8 @@ const getAnalyticsWebProviderConfig = async (
             type: "text",
             name: config.env.analytics[App.WEB].plausible.domain,
             message: "Enter your Plausible domain",
-            initial: configuredEnv[config.env.analytics[App.WEB].plausible.domain],
+            initial:
+              configuredEnv[config.env.analytics[App.WEB].plausible.domain],
           },
           {
             type: "text",
@@ -168,7 +172,8 @@ const getAnalyticsWebProviderConfig = async (
             type: "text",
             name: config.env.analytics[App.WEB].vemetric.token,
             message: "Enter your Vemetric project token",
-            initial: configuredEnv[config.env.analytics[App.WEB].vemetric.token],
+            initial:
+              configuredEnv[config.env.analytics[App.WEB].vemetric.token],
           },
         ],
         { onCancel },

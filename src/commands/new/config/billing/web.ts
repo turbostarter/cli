@@ -5,6 +5,11 @@ import { getLabel, onCancel } from "~/utils";
 
 import type { BillingProvider as BillingProviderType } from "~/config";
 
+const DodoPaymentsEnvironment = {
+  TEST_MODE: "test_mode",
+  LIVE_MODE: "live_mode",
+} as const;
+
 const getBillingWebProvider = async (): Promise<{
   provider: BillingProviderType[typeof App.WEB];
 }> => {
@@ -36,7 +41,8 @@ const getBillingWebProviderConfig = async (
             type: "text",
             name: config.env.billing[App.WEB].stripe.secretKey,
             message: "Enter your Stripe secret key",
-            initial: configuredEnv[config.env.billing[App.WEB].stripe.secretKey],
+            initial:
+              configuredEnv[config.env.billing[App.WEB].stripe.secretKey],
           },
           {
             type: "text",
@@ -56,14 +62,18 @@ const getBillingWebProviderConfig = async (
             name: config.env.billing[App.WEB]["lemon-squeezy"].storeId,
             message: "Enter your Lemon Squeezy store ID",
             initial:
-              configuredEnv[config.env.billing[App.WEB]["lemon-squeezy"].storeId],
+              configuredEnv[
+                config.env.billing[App.WEB]["lemon-squeezy"].storeId
+              ],
           },
           {
             type: "text",
             name: config.env.billing[App.WEB]["lemon-squeezy"].apiKey,
             message: "Enter your Lemon Squeezy API key",
             initial:
-              configuredEnv[config.env.billing[App.WEB]["lemon-squeezy"].apiKey],
+              configuredEnv[
+                config.env.billing[App.WEB]["lemon-squeezy"].apiKey
+              ],
           },
           {
             type: "text",
@@ -100,6 +110,53 @@ const getBillingWebProviderConfig = async (
             message: "Enter your Polar organization slug",
             initial:
               configuredEnv[config.env.billing[App.WEB].polar.organizationSlug],
+          },
+        ],
+        { onCancel },
+      );
+    case BillingProvider[App.WEB].DODO_PAYMENTS:
+      return prompts(
+        [
+          {
+            type: "text",
+            name: config.env.billing[App.WEB]["dodo-payments"].apiKey,
+            message: "Enter your Dodo Payments API key",
+            initial:
+              configuredEnv[
+                config.env.billing[App.WEB]["dodo-payments"].apiKey
+              ],
+          },
+          {
+            type: "text",
+            name: config.env.billing[App.WEB]["dodo-payments"].webhookKey,
+            message: "Enter your Dodo Payments webhook key",
+            initial:
+              configuredEnv[
+                config.env.billing[App.WEB]["dodo-payments"].webhookKey
+              ],
+          },
+          {
+            type: "select",
+            name: config.env.billing[App.WEB]["dodo-payments"].environment,
+            message: "Select your Dodo Payments environment",
+            choices: Object.values(DodoPaymentsEnvironment).map(
+              (environment) => ({
+                title: getLabel(environment),
+                value: environment,
+              }),
+            ),
+            initial: (() => {
+              const environments = Object.values(DodoPaymentsEnvironment);
+              const configured =
+                configuredEnv[
+                  config.env.billing[App.WEB]["dodo-payments"].environment
+                ];
+              const index = environments.findIndex(
+                (environment) => environment === configured,
+              );
+
+              return index >= 0 ? index : 0;
+            })(),
           },
         ],
         { onCancel },

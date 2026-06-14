@@ -46,6 +46,7 @@ export const BillingProvider = {
     STRIPE: "stripe",
     LEMON_SQUEEZY: "lemon-squeezy",
     POLAR: "polar",
+    DODO_PAYMENTS: "dodo-payments",
   },
   [App.MOBILE]: {
     REVENUECAT: "revenuecat",
@@ -135,6 +136,11 @@ const env = {
         accessToken: "POLAR_ACCESS_TOKEN",
         webhookSecret: "POLAR_WEBHOOK_SECRET",
         organizationSlug: "POLAR_ORGANIZATION_SLUG",
+      },
+      [BillingProvider[App.WEB].DODO_PAYMENTS]: {
+        apiKey: "DODO_PAYMENTS_API_KEY",
+        webhookKey: "DODO_PAYMENTS_WEBHOOK_KEY",
+        environment: "DODO_PAYMENTS_ENVIRONMENT",
       },
     },
     [App.MOBILE]: {
@@ -283,6 +289,9 @@ export const envInPaths = {
     env.billing[App.WEB].polar.accessToken,
     env.billing[App.WEB].polar.webhookSecret,
     env.billing[App.WEB].polar.organizationSlug,
+    env.billing[App.WEB]["dodo-payments"].apiKey,
+    env.billing[App.WEB]["dodo-payments"].webhookKey,
+    env.billing[App.WEB]["dodo-payments"].environment,
     env.billing[App.MOBILE].revenuecat.webhookSecret,
     env.billing[App.MOBILE].revenuecat.apiKey,
     env.billing[App.MOBILE].superwall.webhookSecret,

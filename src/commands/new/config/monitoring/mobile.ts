@@ -38,7 +38,8 @@ const getMonitoringMobileProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.MOBILE].sentry.dsn,
             message: "Enter your Sentry DSN",
-            initial: configuredEnv[config.env.monitoring[App.MOBILE].sentry.dsn],
+            initial:
+              configuredEnv[config.env.monitoring[App.MOBILE].sentry.dsn],
           },
         ],
         { onCancel },
@@ -50,7 +51,8 @@ const getMonitoringMobileProviderConfig = async (
             type: "text",
             name: config.env.monitoring[App.MOBILE].posthog.key,
             message: "Enter your PostHog key",
-            initial: configuredEnv[config.env.monitoring[App.MOBILE].posthog.key],
+            initial:
+              configuredEnv[config.env.monitoring[App.MOBILE].posthog.key],
           },
           {
             type: "text",

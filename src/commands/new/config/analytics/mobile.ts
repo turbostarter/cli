@@ -56,7 +56,8 @@ const getAnalyticsMobileProviderConfig = async (
             type: "text",
             name: config.env.analytics[App.MOBILE].posthog.key,
             message: "Enter your PostHog key",
-            initial: configuredEnv[config.env.analytics[App.MOBILE].posthog.key],
+            initial:
+              configuredEnv[config.env.analytics[App.MOBILE].posthog.key],
           },
           {
             type: "text",
