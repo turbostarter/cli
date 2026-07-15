@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.6.0
+
+### Minor Changes
+
+- [`ad4d330`](https://github.com/turbostarter/cli/commit/ad4d330eac25dcee2be075757e0457087598689f) Thanks [@Bartek532](https://github.com/Bartek532)! - Add Mailgun as an email provider option and remove app-specific CI workflows when mobile or extension is not selected during project setup.
+
 ## 1.5.0
 
 ### Minor Changes
