@@ -85,6 +85,34 @@ const getEmailProviderConfig = async (
           onCancel,
         },
       );
+    case EmailProvider.MAILGUN:
+      return prompts(
+        [
+          {
+            type: "text",
+            name: config.env.email.mailgun.apiKey,
+            message: "Enter your Mailgun API key",
+            initial: configuredEnv[config.env.email.mailgun.apiKey],
+          },
+          {
+            type: "text",
+            name: config.env.email.mailgun.domain,
+            message: "Enter your Mailgun domain",
+            initial: configuredEnv[config.env.email.mailgun.domain],
+          },
+          {
+            type: "text",
+            name: config.env.email.mailgun.apiUrl,
+            message: "Enter your Mailgun API URL",
+            initial:
+              configuredEnv[config.env.email.mailgun.apiUrl] ??
+              "https://api.mailgun.net",
+          },
+        ],
+        {
+          onCancel,
+        },
+      );
     case EmailProvider.NODEMAILER:
       return prompts(
         [

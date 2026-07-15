@@ -20,6 +20,7 @@ export const EmailProvider = {
   SENDGRID: "sendgrid",
   POSTMARK: "postmark",
   PLUNK: "plunk",
+  MAILGUN: "mailgun",
   NODEMAILER: "nodemailer",
 } as const;
 
@@ -170,6 +171,11 @@ const env = {
     [EmailProvider.POSTMARK]: {
       apiKey: "POSTMARK_API_KEY",
     },
+    [EmailProvider.MAILGUN]: {
+      apiKey: "MAILGUN_API_KEY",
+      domain: "MAILGUN_DOMAIN",
+      apiUrl: "MAILGUN_API_URL",
+    },
     [EmailProvider.NODEMAILER]: {
       user: "NODEMAILER_USER",
       password: "NODEMAILER_PASSWORD",
@@ -277,6 +283,9 @@ export const envInPaths = {
     env.email.sendgrid.apiKey,
     env.email.plunk.apiKey,
     env.email.postmark.apiKey,
+    env.email.mailgun.apiKey,
+    env.email.mailgun.domain,
+    env.email.mailgun.apiUrl,
     env.email.nodemailer.user,
     env.email.nodemailer.password,
     env.storage.s3.accessKeyId,

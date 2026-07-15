@@ -23,7 +23,8 @@ export const fileModificationsByMissingApp = {
     ),
     ...[
       "packages/auth/src/client/mobile.ts",
-      "packages/auth/src/server/mobile.ts",
+      ".github/workflows/e2e-mobile.yml",
+      ".github/workflows/publish-mobile.yml",
     ].map((path) =>
       file({
         path,
@@ -192,10 +193,15 @@ export const fileModificationsByMissingApp = {
         action: "remove",
       }),
     ),
-    file({
-      path: ".github/workflows/publish-extension.yml",
-      action: "remove",
-    }),
+    ...[
+      ".github/workflows/publish-extension.yml",
+      ".github/workflows/e2e-extension.yml",
+    ].map((path) =>
+      file({
+        path,
+        action: "remove",
+      }),
+    ),
     file({
       path: "packages/auth/src/server.ts",
       action: "modify",
