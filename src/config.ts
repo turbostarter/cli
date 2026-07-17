@@ -102,19 +102,19 @@ export type EnvFile = (typeof EnvFile)[keyof typeof EnvFile];
 export type App = (typeof App)[keyof typeof App];
 
 export type BillingProvider = {
-  [K in Mutable<
-    keyof typeof BillingProvider
-  >]: (typeof BillingProvider)[K][keyof (typeof BillingProvider)[K]];
+  [
+    K in Mutable<keyof typeof BillingProvider>
+  ]: (typeof BillingProvider)[K][keyof (typeof BillingProvider)[K]];
 };
 export type AnalyticsProvider = {
-  [K in Mutable<
-    keyof typeof AnalyticsProvider
-  >]: (typeof AnalyticsProvider)[K][keyof (typeof AnalyticsProvider)[K]];
+  [
+    K in Mutable<keyof typeof AnalyticsProvider>
+  ]: (typeof AnalyticsProvider)[K][keyof (typeof AnalyticsProvider)[K]];
 };
 export type MonitoringProvider = {
-  [K in Mutable<
-    keyof typeof MonitoringProvider
-  >]: (typeof MonitoringProvider)[K][keyof (typeof MonitoringProvider)[K]];
+  [
+    K in Mutable<keyof typeof MonitoringProvider>
+  ]: (typeof MonitoringProvider)[K][keyof (typeof MonitoringProvider)[K]];
 };
 
 const env = {
@@ -435,8 +435,23 @@ export const servicesPackages: Record<Service, string> = {
   [Service.DB]: "@workspace/db",
 };
 
+export const products = {
+  core: {
+    repository: "turbostarter/core",
+    url: "https://www.turbostarter.dev",
+  },
+  ai: {
+    repository: "turbostarter/ai",
+    url: "https://www.turbostarter.dev/ai",
+  },
+  openclaw: {
+    repository: "turbostarter/openclaw",
+    url: "https://www.turbostarter.dev/openclaw",
+  },
+} as const;
+
 export const config = {
   name: "TurboStarter",
-  repository: "turbostarter/core",
+  products,
   env,
 } as const;

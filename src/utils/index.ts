@@ -51,3 +51,4 @@ export const getErrorOutput = (error: unknown) => {
 
 export * from "./logger";
 export * from "./upstream";
+export * from "./upsell";

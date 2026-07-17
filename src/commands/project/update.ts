@@ -12,6 +12,7 @@ import {
   hasSshAccess,
   httpsUrl,
   isUpstreamUrlValid,
+  logAddOnUpsell,
   logger,
   setUpstreamRemote,
   sshUrl,
@@ -62,9 +63,10 @@ export const projectUpdateCommand = new Command()
           spinner.succeed("Already up to date.");
         } else {
           spinner.succeed(
-            `Successfully pulled latest changes from ${color.cyan(config.repository)}.`,
+            `Successfully pulled latest changes from ${color.cyan(config.products.core.repository)}.`,
           );
         }
+        await logAddOnUpsell("update");
         return;
       }
 
@@ -120,15 +122,17 @@ const updateProject = async ({
   if (!currentUpstreamUrl) {
     const useSsh = await hasSshAccess();
     const url = useSsh
-      ? sshUrl(config.repository)
-      : httpsUrl(config.repository);
+      ? sshUrl(config.products.core.repository)
+      : httpsUrl(config.products.core.repository);
     await setUpstreamRemote(url, { cwd });
     currentUpstreamUrl = url;
-  } else if (!isUpstreamUrlValid(currentUpstreamUrl, config.repository)) {
+  } else if (
+    !isUpstreamUrlValid(currentUpstreamUrl, config.products.core.repository)
+  ) {
     const useSsh = currentUpstreamUrl.startsWith("git@");
     const expectedUrl = useSsh
-      ? sshUrl(config.repository)
-      : httpsUrl(config.repository);
+      ? sshUrl(config.products.core.repository)
+      : httpsUrl(config.products.core.repository);
 
     return {
       success: false,

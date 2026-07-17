@@ -31,6 +31,8 @@ import {
   enforceSchema,
   hasSshAccess,
   httpsUrl,
+  logAddOnUpsell,
+  logCoreUpsell,
   logger,
   onCancel,
   setUpstreamRemote,
@@ -84,6 +86,7 @@ export const newCommand = new Command()
       logger.info(
         `Problems? ${color.underline("https://turbostarter.dev/docs")}`,
       );
+      await logAddOnUpsell("new_success");
     } catch (error) {
       logger.error(error);
       process.exit(1);
@@ -270,8 +273,8 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
 
   try {
     const url = (await hasSshAccess())
-      ? sshUrl(appConfig.repository)
-      : httpsUrl(appConfig.repository);
+      ? sshUrl(appConfig.products.core.repository)
+      : httpsUrl(appConfig.products.core.repository);
     await execa("git", ["clone", "-b", "main", "--single-branch", url, name], {
       cwd,
     });
@@ -283,6 +286,7 @@ const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
   } catch (error) {
     spinner.fail("Failed to clone TurboStarter! Please try again.");
     logger.error(error);
+    logCoreUpsell();
     process.exit(1);
   }
 };
@@ -335,8 +339,8 @@ const configureGit = async (cwd: string, apps: App[]) => {
 
   try {
     const upstreamUrl = (await hasSshAccess())
-      ? sshUrl(appConfig.repository)
-      : httpsUrl(appConfig.repository);
+      ? sshUrl(appConfig.products.core.repository)
+      : httpsUrl(appConfig.products.core.repository);
     await setUpstreamRemote(upstreamUrl, { cwd });
 
     if (missingApps.length > 0) {

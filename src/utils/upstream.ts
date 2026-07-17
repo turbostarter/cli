@@ -31,6 +31,24 @@ export async function hasSshAccess(): Promise<boolean> {
   }
 }
 
+export async function hasRepoAccess(
+  repo: string,
+  options?: { useSsh?: boolean; timeout?: number },
+): Promise<boolean> {
+  try {
+    const useSsh = options?.useSsh ?? (await hasSshAccess());
+    const url = useSsh ? sshUrl(repo) : httpsUrl(repo);
+
+    await execa("git", ["ls-remote", "--exit-code", url, "HEAD"], {
+      timeout: options?.timeout ?? 8_000,
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function isUpstreamUrlValid(url: string, repo: string): boolean {
   const normalized = url.replace(/\/+$/, "").replace(/\.git$/, "");
 
