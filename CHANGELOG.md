@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.7.0
+
+### Minor Changes
+
+- [`47588f0`](https://github.com/turbostarter/cli/commit/47588f07c4a21305cd0aa5d5b82645c5529c9c6f) Thanks [@Bartek532](https://github.com/Bartek532)! - Add product upsell prompts for Core, AI, and OpenClaw kits, restructure product config, and update dependencies (pnpm 11 with minimum release age).
+
 ## 1.6.0
 
 ### Minor Changes
