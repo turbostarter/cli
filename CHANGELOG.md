@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.8.0
+
+### Minor Changes
+
+- [`b91365c`](https://github.com/turbostarter/cli/commit/b91365c8e28d93211054e083e5932b5d1c46f4d1) Thanks [@Bartek532](https://github.com/Bartek532)! - Add feature flags provider configuration (In Memory, PostHog, GrowthBook) to the `new` project bootstrap flow, including env setup and removing unused flags packages when mobile or extension apps are not selected. Also remove the unused `react-native-ios-utilities` pnpm patch when mobile is not selected so install succeeds.
+
 ## 1.7.0
 
 ### Minor Changes
