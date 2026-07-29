@@ -92,6 +92,24 @@ export const MonitoringProvider = {
   },
 } as const;
 
+export const FlagsProvider = {
+  [App.WEB]: {
+    IN_MEMORY: "in-memory",
+    POSTHOG: "posthog",
+    GROWTHBOOK: "growthbook",
+  },
+  [App.MOBILE]: {
+    IN_MEMORY: "in-memory",
+    POSTHOG: "posthog",
+    GROWTHBOOK: "growthbook",
+  },
+  [App.EXTENSION]: {
+    IN_MEMORY: "in-memory",
+    POSTHOG: "posthog",
+    GROWTHBOOK: "growthbook",
+  },
+} as const;
+
 export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType];
 export type Service = (typeof Service)[keyof typeof Service];
 export type StorageProvider =
@@ -115,6 +133,11 @@ export type MonitoringProvider = {
   [
     K in Mutable<keyof typeof MonitoringProvider>
   ]: (typeof MonitoringProvider)[K][keyof (typeof MonitoringProvider)[K]];
+};
+export type FlagsProvider = {
+  [
+    K in Mutable<keyof typeof FlagsProvider>
+  ]: (typeof FlagsProvider)[K][keyof (typeof FlagsProvider)[K]];
 };
 
 const env = {
@@ -274,6 +297,41 @@ const env = {
       },
     },
   },
+  flags: {
+    [App.WEB]: {
+      [FlagsProvider[App.WEB].IN_MEMORY]: {},
+      [FlagsProvider[App.WEB].POSTHOG]: {
+        key: "NEXT_PUBLIC_POSTHOG_KEY",
+        host: "NEXT_PUBLIC_POSTHOG_HOST",
+      },
+      [FlagsProvider[App.WEB].GROWTHBOOK]: {
+        clientKey: "NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY",
+        apiHost: "NEXT_PUBLIC_GROWTHBOOK_API_HOST",
+      },
+    },
+    [App.MOBILE]: {
+      [FlagsProvider[App.MOBILE].IN_MEMORY]: {},
+      [FlagsProvider[App.MOBILE].POSTHOG]: {
+        key: "EXPO_PUBLIC_POSTHOG_KEY",
+        host: "EXPO_PUBLIC_POSTHOG_HOST",
+      },
+      [FlagsProvider[App.MOBILE].GROWTHBOOK]: {
+        clientKey: "EXPO_PUBLIC_GROWTHBOOK_CLIENT_KEY",
+        apiHost: "EXPO_PUBLIC_GROWTHBOOK_API_HOST",
+      },
+    },
+    [App.EXTENSION]: {
+      [FlagsProvider[App.EXTENSION].IN_MEMORY]: {},
+      [FlagsProvider[App.EXTENSION].POSTHOG]: {
+        key: "VITE_POSTHOG_KEY",
+        host: "VITE_POSTHOG_HOST",
+      },
+      [FlagsProvider[App.EXTENSION].GROWTHBOOK]: {
+        clientKey: "VITE_GROWTHBOOK_CLIENT_KEY",
+        apiHost: "VITE_GROWTHBOOK_API_HOST",
+      },
+    },
+  },
 } as const;
 
 export const envInPaths = {
@@ -321,6 +379,10 @@ export const envInPaths = {
     env.monitoring[App.WEB].sentry.dsn,
     env.monitoring[App.WEB].posthog.key,
     env.monitoring[App.WEB].posthog.host,
+    env.flags[App.WEB].posthog.key,
+    env.flags[App.WEB].posthog.host,
+    env.flags[App.WEB].growthbook.clientKey,
+    env.flags[App.WEB].growthbook.apiHost,
   ],
   [EnvPath.MOBILE]: [
     env.billing[App.MOBILE].revenuecat.appleApiKey,
@@ -331,6 +393,10 @@ export const envInPaths = {
     env.analytics[App.MOBILE].posthog.key,
     env.analytics[App.MOBILE].posthog.host,
     env.monitoring[App.MOBILE].sentry.dsn,
+    env.flags[App.MOBILE].posthog.key,
+    env.flags[App.MOBILE].posthog.host,
+    env.flags[App.MOBILE].growthbook.clientKey,
+    env.flags[App.MOBILE].growthbook.apiHost,
   ],
   [EnvPath.EXTENSION]: [
     env.analytics[App.EXTENSION]["google-analytics"].measurementId,
@@ -338,6 +404,10 @@ export const envInPaths = {
     env.analytics[App.EXTENSION].posthog.key,
     env.analytics[App.EXTENSION].posthog.host,
     env.monitoring[App.EXTENSION].sentry.dsn,
+    env.flags[App.EXTENSION].posthog.key,
+    env.flags[App.EXTENSION].posthog.host,
+    env.flags[App.EXTENSION].growthbook.clientKey,
+    env.flags[App.EXTENSION].growthbook.apiHost,
   ],
 };
 
@@ -425,6 +495,33 @@ export const providerConfigFiles = {
       files: ["packages/monitoring/extension/src/providers/index.ts"],
       pattern: new RegExp(
         `(${Object.values(MonitoringProvider[App.EXTENSION]).join("|")})`,
+        "gi",
+      ),
+    },
+  },
+  flags: {
+    [App.WEB]: {
+      files: [
+        "packages/flags/web/src/providers/index.ts",
+        "packages/flags/web/src/providers/server.ts",
+        "packages/flags/web/src/providers/env.ts",
+      ],
+      pattern: new RegExp(
+        `(${Object.values(FlagsProvider[App.WEB]).join("|")})`,
+        "gi",
+      ),
+    },
+    [App.MOBILE]: {
+      files: ["packages/flags/mobile/src/providers/index.ts"],
+      pattern: new RegExp(
+        `(${Object.values(FlagsProvider[App.MOBILE]).join("|")})`,
+        "gi",
+      ),
+    },
+    [App.EXTENSION]: {
+      files: ["packages/flags/extension/src/providers/index.ts"],
+      pattern: new RegExp(
+        `(${Object.values(FlagsProvider[App.EXTENSION]).join("|")})`,
         "gi",
       ),
     },

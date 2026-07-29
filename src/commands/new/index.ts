@@ -18,6 +18,7 @@ import {
   setEnvironmentVariables,
 } from "~/commands/new/config/env";
 import { fileModificationsByMissingApp } from "~/commands/new/config/file-modifications";
+import { getFlagsConfig } from "~/commands/new/config/flags";
 import { getMonitoringConfig } from "~/commands/new/config/monitoring";
 import { getStorageConfig } from "~/commands/new/config/storage";
 import {
@@ -41,6 +42,7 @@ import {
 } from "~/utils";
 import {
   isJsonFile,
+  isTextFile,
   isTypescriptFile,
   removePath,
   replaceInFiles,
@@ -53,6 +55,7 @@ import type {
   AnalyticsProvider,
   BillingProvider,
   EmailProvider,
+  FlagsProvider,
   MonitoringProvider,
   StorageProvider,
 } from "~/config";
@@ -126,6 +129,7 @@ const initializeProject = async (options: z.infer<typeof newOptionsSchema>) => {
       billing: config.billing.providers,
       analytics: config.analytics.providers,
       monitoring: config.monitoring.providers,
+      flags: config.flags.providers,
     });
   }
 
@@ -255,6 +259,9 @@ const getProvidersConfig = async (apps: App[]) => {
   const monitoring = await getMonitoringConfig(apps, configuredEnv);
   Object.assign(configuredEnv, monitoring.env);
 
+  const flags = await getFlagsConfig(apps, configuredEnv);
+  Object.assign(configuredEnv, flags.env);
+
   const env = {
     ...("env" in db ? db.env : {}),
     ...billing.env,
@@ -262,9 +269,10 @@ const getProvidersConfig = async (apps: App[]) => {
     ...storage.env,
     ...analytics.env,
     ...monitoring.env,
+    ...flags.env,
   };
 
-  return { db, email, billing, analytics, storage, monitoring, env };
+  return { db, email, billing, analytics, storage, monitoring, flags, env };
 };
 
 const cloneRepository = async (cwd: string, name: string, apps: App[]) => {
@@ -329,6 +337,11 @@ const modifyFilesForMissingApps = async (cwd: string, apps: App[]) => {
         file.modify(sourceFile);
         await sourceFile.save();
       }
+
+      if (isTextFile(file)) {
+        const content = await promises.readFile(join(cwd, file.path), "utf8");
+        await promises.writeFile(join(cwd, file.path), file.modify(content));
+      }
     }
   }
 };
@@ -386,6 +399,7 @@ const updateProvidersFiles = async (
     billing?: Partial<BillingProvider>;
     analytics?: Partial<AnalyticsProvider>;
     monitoring?: Partial<MonitoringProvider>;
+    flags?: Partial<FlagsProvider>;
   },
 ) => {
   const spinner = ora(`Updating providers files...`).start();
@@ -454,6 +468,22 @@ const updateProvidersFiles = async (
               providerConfigFiles.monitoring[
                 key as keyof typeof MonitoringProvider
               ].pattern,
+            value,
+          }),
+        ),
+      );
+    }
+    if (providers.flags && Object.keys(providers.flags).length > 0) {
+      await Promise.all(
+        Object.entries(providers.flags).map(([key, value]) =>
+          replaceInFiles({
+            cwd,
+            paths:
+              providerConfigFiles.flags[key as keyof typeof FlagsProvider]
+                .files,
+            pattern:
+              providerConfigFiles.flags[key as keyof typeof FlagsProvider]
+                .pattern,
             value,
           }),
         ),

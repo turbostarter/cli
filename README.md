@@ -61,7 +61,7 @@ Options:
 What it does:
 
 - Prompts for project name and app targets (web, mobile, extension).
-- Optionally walks through provider configuration (db, billing, email, storage, analytics, monitoring).
+- Optionally walks through provider configuration (db, billing, email, storage, analytics, monitoring, feature flags).
 - Clones the TurboStarter template repository.
 - Configures git remotes.
 - Applies app-specific file modifications.

@@ -11,9 +11,15 @@ type BivariantCallback<TInput, TOutput> = {
 
 type GeneralFile = {
   path: string;
-} & {
-  action: "remove";
-};
+} & (
+  | {
+      action: "remove";
+    }
+  | {
+      action: "modify";
+      modify: (content: string) => string;
+    }
+);
 
 type JsonFile<Schema extends z.$ZodType, Data = z.infer<Schema>> = {
   path: `${string}.json`;
@@ -65,6 +71,11 @@ export const isJsonFile = (
 export const isTypescriptFile = (file: Entry): file is TypescriptFile =>
   [".ts", ".tsx"].some((extension) => file.path.endsWith(extension));
 
+export const isTextFile = (
+  file: Entry,
+): file is Extract<GeneralFile, { action: "modify" }> =>
+  file.action === "modify" && !isJsonFile(file) && !isTypescriptFile(file);
+
 export const removePath = async ({
   cwd,
   path,
@@ -94,6 +105,21 @@ export const removeDependency = <T extends Record<string, unknown>>(
     },
     {},
   ) as T;
+};
+
+export const removePatchedDependency = (
+  content: string,
+  dependency: string,
+) => {
+  const withoutEntry = content.replace(
+    new RegExp(
+      `^  ${dependency.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}:.*\\n?`,
+      "m",
+    ),
+    "",
+  );
+
+  return withoutEntry.replace(/\n*patchedDependencies:\n(?! {2}\S)/, "\n");
 };
 
 export const replaceInFile = async ({

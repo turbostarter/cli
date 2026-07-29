@@ -2,7 +2,12 @@ import { Node, SyntaxKind } from "ts-morph";
 import { z } from "zod";
 
 import { App } from "~/config";
-import { directory, file, removeDependency } from "~/utils/file";
+import {
+  directory,
+  file,
+  removeDependency,
+  removePatchedDependency,
+} from "~/utils/file";
 
 import type { ArrayLiteralExpression } from "ts-morph";
 
@@ -13,8 +18,10 @@ export const fileModificationsByMissingApp = {
       "apps/mobile",
       "packages/analytics/mobile",
       "packages/billing/mobile",
+      "packages/flags/mobile",
       "packages/monitoring/mobile",
       "packages/ui/mobile",
+      "patches",
     ].map((path) =>
       directory({
         path,
@@ -31,6 +38,12 @@ export const fileModificationsByMissingApp = {
         action: "remove",
       }),
     ),
+    file({
+      path: "pnpm-workspace.yaml",
+      action: "modify",
+      modify: (content) =>
+        removePatchedDependency(content, "react-native-ios-utilities@5.2.0"),
+    }),
     file({
       path: "packages/api/package.json",
       action: "modify",
@@ -186,6 +199,7 @@ export const fileModificationsByMissingApp = {
     ...[
       "apps/extension",
       "packages/analytics/extension",
+      "packages/flags/extension",
       "packages/monitoring/extension",
     ].map((path) =>
       directory({
