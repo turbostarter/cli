@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import color from "picocolors";
 
+import { edgeEnv, envInPaths } from "~/commands/new/edge/config";
 import { Kit } from "~/config";
 import { logger } from "~/utils";
 
@@ -9,23 +10,37 @@ import {
   configureGit,
   getConfigureProvidersStep,
   installDependencies,
+  setEnvironmentVariablesInPaths,
 } from "../common";
 
 import { prepareLocalD1 } from "./database";
-import { prepareEdgeEnvironment } from "./environment";
+import { prepareEnvironment } from "./environment";
+import { configureProviders } from "./providers";
 import { configureWrangler } from "./wrangler";
 
 import type { NewProject } from "../common";
 
 export const initializeEdgeProject = async (project: NewProject) => {
-  const configure = await getConfigureProvidersStep();
+  const shouldConfigureProviders = await getConfigureProvidersStep();
+  const config = shouldConfigureProviders
+    ? await configureProviders()
+    : undefined;
+
   logger.log(
     `\nCreating a new Edge Kit project in ${color.greenBright(join(project.cwd, project.name))}.\n`,
   );
 
   const projectDir = await cloneKit(project, Kit.EDGE);
-  const values = await prepareEdgeEnvironment(project, projectDir, configure);
-  await configureWrangler(project, projectDir, values);
+  await prepareEnvironment(project, projectDir);
+
+  if (config) {
+    await setEnvironmentVariablesInPaths(projectDir, config.env, envInPaths);
+  }
+
+  await configureWrangler(project, projectDir, {
+    [edgeEnv.productName]: project.projectName,
+    ...config?.env,
+  });
   await installDependencies(projectDir);
   await prepareLocalD1(projectDir);
   await configureGit(projectDir);

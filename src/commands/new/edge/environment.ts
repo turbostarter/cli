@@ -1,28 +1,10 @@
-import { copyEnvExamples, setEnvValue } from "../common";
+import { edgeEnv } from "~/commands/new/edge/config";
 
-import { configureProviders } from "./providers";
+import { copyEnvExamples, setEnvValue } from "../common";
 
 import type { NewProject } from "../common";
 
-export const prepareEdgeEnvironment = async (
-  project: NewProject,
-  cwd: string,
-  configure: boolean,
-) => {
+export const prepareEnvironment = async (project: NewProject, cwd: string) => {
   await copyEnvExamples(cwd, ["."]);
-  await setEnvValue(cwd, ".", "VITE_PRODUCT_NAME", project.projectName);
-  await setEnvValue(cwd, ".", "CONTACT_EMAIL", "hello@example.com");
-  await setEnvValue(
-    cwd,
-    ".",
-    "EMAIL_FROM",
-    `${project.projectName} <noreply@example.com>`,
-  );
-
-  return {
-    VITE_PRODUCT_NAME: project.projectName,
-    CONTACT_EMAIL: "hello@example.com",
-    EMAIL_FROM: `${project.projectName} <noreply@example.com>`,
-    ...(configure ? await configureProviders(cwd) : {}),
-  };
+  await setEnvValue(cwd, ".", edgeEnv.productName, project.projectName);
 };

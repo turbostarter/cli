@@ -1,41 +1,46 @@
+import color from "picocolors";
+
+import { edgeEnv } from "~/commands/new/edge/config";
+import { logger } from "~/utils";
+
 import { configureEnvGroups } from "../common";
 
-const edgeGroups = [
+const groups = [
   {
     title: "contact and sender email",
     entries: [
-      { key: "CONTACT_EMAIL", label: "Contact inbox email" },
-      { key: "EMAIL_FROM", label: "Sender email address" },
+      { key: edgeEnv.contactEmail, label: "Contact inbox email" },
+      { key: edgeEnv.emailFrom, label: "Sender email address" },
     ],
   },
   {
     title: "authentication methods and OAuth",
     entries: [
       {
-        key: "VITE_AUTH_PASSWORD",
+        key: edgeEnv.auth.password,
         label: "Enable password authentication? (true/false)",
         boolean: true,
       },
       {
-        key: "VITE_AUTH_ANONYMOUS",
+        key: edgeEnv.auth.anonymous,
         label: "Enable anonymous authentication? (true/false)",
         boolean: true,
       },
-      { key: "GOOGLE_CLIENT_ID", label: "Google client ID" },
+      { key: edgeEnv.auth.google.clientId, label: "Google client ID" },
       {
-        key: "GOOGLE_CLIENT_SECRET",
+        key: edgeEnv.auth.google.clientSecret,
         label: "Google client secret",
         secret: true,
       },
-      { key: "GITHUB_CLIENT_ID", label: "GitHub client ID" },
+      { key: edgeEnv.auth.github.clientId, label: "GitHub client ID" },
       {
-        key: "GITHUB_CLIENT_SECRET",
+        key: edgeEnv.auth.github.clientSecret,
         label: "GitHub client secret",
         secret: true,
       },
-      { key: "CLOUDFLARE_CLIENT_ID", label: "Cloudflare client ID" },
+      { key: edgeEnv.auth.cloudflare.clientId, label: "Cloudflare client ID" },
       {
-        key: "CLOUDFLARE_CLIENT_SECRET",
+        key: edgeEnv.auth.cloudflare.clientSecret,
         label: "Cloudflare client secret",
         secret: true,
       },
@@ -44,9 +49,9 @@ const edgeGroups = [
   {
     title: "Turnstile",
     entries: [
-      { key: "VITE_TURNSTILE_SITE_KEY", label: "Turnstile site key" },
+      { key: edgeEnv.turnstile.siteKey, label: "Turnstile site key" },
       {
-        key: "TURNSTILE_SECRET_KEY",
+        key: edgeEnv.turnstile.secretKey,
         label: "Turnstile secret key",
         secret: true,
       },
@@ -55,9 +60,13 @@ const edgeGroups = [
   {
     title: "Stripe",
     entries: [
-      { key: "STRIPE_SECRET_KEY", label: "Stripe secret key", secret: true },
       {
-        key: "STRIPE_WEBHOOK_SECRET",
+        key: edgeEnv.stripe.secretKey,
+        label: "Stripe secret key",
+        secret: true,
+      },
+      {
+        key: edgeEnv.stripe.webhookSecret,
         label: "Stripe webhook secret",
         secret: true,
       },
@@ -66,10 +75,24 @@ const edgeGroups = [
   {
     title: "Cloudflare Web Analytics",
     entries: [
-      { key: "VITE_CF_WEB_ANALYTICS_TOKEN", label: "Web Analytics token" },
+      {
+        key: edgeEnv.analytics.webAnalyticsToken,
+        label: "Web Analytics token",
+      },
     ],
   },
 ];
 
-export const configureProviders = async (cwd: string) =>
-  configureEnvGroups(cwd, ".", edgeGroups);
+export const configureProviders = async () => {
+  logger.info(
+    `\nLet's configure it!\nYou can skip any step by pressing ${color.bold("enter")}.\n`,
+  );
+
+  return {
+    env: {
+      CONTACT_EMAIL: "hello@example.com",
+      EMAIL_FROM: `noreply@example.com`,
+      ...(await configureEnvGroups(groups)),
+    },
+  };
+};

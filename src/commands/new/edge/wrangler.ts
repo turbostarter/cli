@@ -1,18 +1,19 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import * as z from "zod";
 
+import { edgeEnv } from "~/commands/new/edge/config";
 import { modifyTextFile } from "~/utils/file";
 
 import type { NewProject } from "../common";
 
 const wranglerVarKeys = new Set([
-  "VITE_PRODUCT_NAME",
-  "CONTACT_EMAIL",
-  "EMAIL_FROM",
-  "VITE_AUTH_PASSWORD",
-  "VITE_AUTH_ANONYMOUS",
-  "VITE_TURNSTILE_SITE_KEY",
-  "VITE_CF_WEB_ANALYTICS_TOKEN",
+  edgeEnv.productName,
+  edgeEnv.contactEmail,
+  edgeEnv.emailFrom,
+  edgeEnv.auth.password,
+  edgeEnv.auth.anonymous,
+  edgeEnv.turnstile.siteKey,
+  edgeEnv.analytics.webAnalyticsToken,
 ]);
 
 const wranglerSchema = z.looseObject({
@@ -44,12 +45,12 @@ const setWranglerVars = (
 ) => {
   config.vars.BETTER_AUTH_URL = "http://localhost:3000";
   config.vars.VITE_URL = "http://localhost:3000";
-  config.vars.VITE_TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
-  config.vars.VITE_CF_WEB_ANALYTICS_TOKEN = "";
+  config.vars[edgeEnv.turnstile.siteKey] = "1x00000000000000000000AA";
+  config.vars[edgeEnv.analytics.webAnalyticsToken] = "";
   for (const [key, value] of Object.entries(values)) {
     if (!wranglerVarKeys.has(key)) continue;
     config.vars[key] =
-      key === "VITE_AUTH_PASSWORD" || key === "VITE_AUTH_ANONYMOUS"
+      key === edgeEnv.auth.password || key === edgeEnv.auth.anonymous
         ? value === "true"
         : value;
   }
@@ -87,7 +88,7 @@ export const configureWrangler = async (
       );
       config.name = project.name;
       setWranglerVars(config, values);
-      setWranglerBindings(config, project, values.EMAIL_FROM);
+      setWranglerBindings(config, project, values[edgeEnv.emailFrom]);
 
       return `${JSON.stringify(config, null, 2)}\n`;
     },
