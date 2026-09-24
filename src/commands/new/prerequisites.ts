@@ -6,10 +6,13 @@ import { logger } from "~/utils/logger";
 
 export const validateNodeInstalled = async () => {
   try {
-    await execa("node", ["--version"]);
+    const { stdout } = await execa("node", ["--version"]);
+    if (Number(/^v(\d+)/.exec(stdout)?.[1]) < 24) {
+      throw new Error("Node.js 24 or newer is required.");
+    }
   } catch {
     logger.error(
-      "Node.js is not installed. Please install Node.js and try again.\n",
+      "Node.js 24 or newer is required. Please update Node.js and try again.\n",
     );
     logger.info(
       `To install Node.js, visit: ${color.underline("https://nodejs.org/en/")}`,
@@ -23,18 +26,13 @@ export const validatePnpmInstalled = async () => {
   try {
     await execa("pnpm", ["--version"]);
   } catch {
-    try {
-      await execa("npm", ["install", "-g", "pnpm"]);
-    } catch {
-      logger.error(
-        "pnpm is not installed. Please install pnpm manually and try again. \n",
-      );
-      logger.info(
-        `To install pnpm, visit: ${color.underline("https://pnpm.io/installation")}`,
-      );
-
-      process.exit(1);
-    }
+    logger.error(
+      "pnpm is not available. Enable Corepack or install pnpm and try again.\n",
+    );
+    logger.info(
+      `To install pnpm, visit: ${color.underline("https://pnpm.io/installation")}`,
+    );
+    process.exit(1);
   }
 };
 

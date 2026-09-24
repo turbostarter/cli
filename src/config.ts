@@ -541,6 +541,10 @@ export const products = {
     repository: "turbostarter/ai",
     url: "https://www.turbostarter.dev/ai",
   },
+  edge: {
+    repository: "turbostarter/edge",
+    url: "https://www.turbostarter.dev/edge",
+  },
   openclaw: {
     repository: "turbostarter/openclaw",
     url: "https://www.turbostarter.dev/openclaw",
