@@ -7,7 +7,7 @@ import { z } from "zod";
 import { logAddOnUpsell, logger, onCancel, slugify } from "~/utils";
 
 import { initializeAiProject } from "./ai";
-import { getProjectName, kits } from "./common";
+import { kits } from "./common";
 import { initializeCoreProject } from "./core";
 import { initializeEdgeProject } from "./edge";
 import { validatePrerequisites } from "./prerequisites";
@@ -33,6 +33,24 @@ const selectKit = async (): Promise<Kit> => {
     { onCancel },
   );
   return z.enum(["core", "ai", "edge"]).parse(result.kit);
+};
+
+const getProjectName = async (): Promise<string> => {
+  const result = await prompts(
+    {
+      type: "text",
+      name: "name",
+      message: "Enter your project name.",
+      validate: (value: string) => {
+        if (!value.trim()) return "Name is required!";
+        if (!slugify(value))
+          return "Name must contain at least one letter or number.";
+        return true;
+      },
+    },
+    { onCancel },
+  );
+  return String(result.name);
 };
 
 export const newCommand = new Command()

@@ -4,21 +4,11 @@ import { config } from "~/config";
 import { logger } from "~/utils/logger";
 import { hasRepoAccess, hasSshAccess } from "~/utils/upstream";
 
-type UpsellCampaign = "clone_fail" | "new_success" | "update";
+type UpsellCampaign = "new_success" | "update";
 
 const withUtm = (url: string, campaign: UpsellCampaign) => {
   const separator = url.includes("?") ? "&" : "?";
   return `${url}${separator}utm_source=cli&utm_medium=terminal&utm_campaign=${campaign}`;
-};
-
-export const logCoreUpsell = () => {
-  const campaign = "clone_fail" as const;
-  const coreUrl = withUtm(config.products.core.url, campaign);
-
-  logger.info(
-    `\nNo access to the Core repository? A license unlocks GitHub access.`,
-  );
-  logger.log(`\nGet Core Kit - ${color.underline(coreUrl)}`);
 };
 
 export const logAddOnUpsell = async (campaign: "new_success" | "update") => {

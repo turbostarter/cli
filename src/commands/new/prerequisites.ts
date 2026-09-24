@@ -26,13 +26,18 @@ export const validatePnpmInstalled = async () => {
   try {
     await execa("pnpm", ["--version"]);
   } catch {
-    logger.error(
-      "pnpm is not available. Enable Corepack or install pnpm and try again.\n",
-    );
-    logger.info(
-      `To install pnpm, visit: ${color.underline("https://pnpm.io/installation")}`,
-    );
-    process.exit(1);
+    try {
+      await execa("npm", ["install", "-g", "pnpm"]);
+    } catch {
+      logger.error(
+        "pnpm is not installed. Please install pnpm manually and try again. \n",
+      );
+      logger.info(
+        `To install pnpm, visit: ${color.underline("https://pnpm.io/installation")}`,
+      );
+
+      process.exit(1);
+    }
   }
 };
 

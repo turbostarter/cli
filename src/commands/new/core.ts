@@ -90,17 +90,10 @@ export const initializeCoreProject = async ({
   }
 
   await installKitDependencies(projectDir);
-  await configureKitGit(projectDir, "core", true);
+  await configureKitGit(projectDir);
 
-  const localServices = [
-    ...(!config || config.db.type === ServiceType.LOCAL ? [Service.DB] : []),
-  ];
-
-  if (localServices.length > 0) {
-    await startServices(projectDir, localServices);
-  }
-
-  return { name, apps };
+  if (!config || config.db.type === ServiceType.LOCAL)
+    await startServices(projectDir, [Service.DB]);
 };
 
 const getApps = async () => {

@@ -13,7 +13,6 @@ import {
   logger,
   onCancel,
   setUpstreamRemote,
-  slugify,
   sshUrl,
 } from "~/utils";
 
@@ -42,24 +41,6 @@ export const kits = {
     docs: "https://www.turbostarter.dev/edge/docs",
   },
 } as const;
-
-export const getProjectName = async (): Promise<string> => {
-  const result = await prompts(
-    {
-      type: "text",
-      name: "name",
-      message: "Enter your project name.",
-      validate: (value: string) => {
-        if (!value.trim()) return "Name is required!";
-        if (!slugify(value))
-          return "Name must contain at least one letter or number.";
-        return true;
-      },
-    },
-    { onCancel },
-  );
-  return String(result.name);
-};
 
 export const getConfigureProvidersStep = async (): Promise<boolean> => {
   const result = await prompts(
@@ -97,44 +78,38 @@ export const cloneKit = async (project: NewProject, kit: Kit) => {
     return join(project.cwd, project.name);
   } catch (error) {
     spinner.fail(`Failed to clone ${kits[kit].label}.`);
-    logger.error(error);
-    logger.info(`Check repository access: ${color.underline(kits[kit].url)}`);
+    logger.info(
+      `Need access to ${kits[kit].label}? ${color.underline(kits[kit].url)}`,
+    );
     throw error;
   }
 };
 
-export const configureKitGit = async (
-  cwd: string,
-  kit: Kit,
-  commitChanges = false,
-) => {
+export const configureKitGit = async (cwd: string) => {
   const spinner = ora("Configuring Git...").start();
   try {
-    const repository = kits[kit].repository;
-    const url = (await hasSshAccess())
-      ? sshUrl(repository)
-      : httpsUrl(repository);
-    await setUpstreamRemote(url, { cwd });
-    if (commitChanges) {
-      await execa("git", ["add", "-u"], { cwd });
-      const { stdout } = await execa(
+    const { stdout: origin } = await execa(
+      "git",
+      ["config", "--get", "remote.origin.url"],
+      { cwd },
+    );
+    await setUpstreamRemote(origin, { cwd });
+    await execa("git", ["add", "-u"], { cwd });
+    const { stdout } = await execa("git", ["diff", "--cached", "--name-only"], {
+      cwd,
+    });
+    if (stdout.trim()) {
+      await execa(
         "git",
-        ["diff", "--cached", "--name-only"],
+        [
+          "-c",
+          "core.hooksPath=/dev/null",
+          "commit",
+          "-m",
+          "chore: initialize project",
+        ],
         { cwd },
       );
-      if (stdout.trim()) {
-        await execa(
-          "git",
-          [
-            "-c",
-            "core.hooksPath=/dev/null",
-            "commit",
-            "-m",
-            "chore: initialize project",
-          ],
-          { cwd },
-        );
-      }
     }
     spinner.succeed("Git successfully configured!");
   } catch (error) {
@@ -173,7 +148,6 @@ export const createAuthSecret = () => randomBytes(32).toString("base64url");
 
 export interface EnvPromptGroup {
   title: string;
-  path: string;
   entries: {
     key: string;
     label: string;
@@ -184,6 +158,7 @@ export interface EnvPromptGroup {
 
 export const configureEnvGroups = async (
   cwd: string,
+  path: string,
   groups: EnvPromptGroup[],
 ) => {
   const configured: Record<string, string> = {};
@@ -214,7 +189,7 @@ export const configureEnvGroups = async (
       );
       const value = String(answer.value ?? "").trim();
       if (value) {
-        await setEnvValue(cwd, group.path, entry.key, value);
+        await setEnvValue(cwd, path, entry.key, value);
         configured[entry.key] = value;
       }
     }

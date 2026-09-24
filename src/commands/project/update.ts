@@ -12,6 +12,7 @@ import {
   hasSshAccess,
   httpsUrl,
   isUpstreamUrlValid,
+  logAddOnUpsell,
   logger,
   setUpstreamRemote,
   sshUrl,
@@ -66,6 +67,8 @@ export const projectUpdateCommand = new Command()
             `Successfully pulled latest changes from ${color.cyan(result.repository)}.`,
           );
         }
+        if (result.repository === config.products.core.repository)
+          await logAddOnUpsell("update");
         return;
       }
 
@@ -219,14 +222,9 @@ const isWithinTurboStarterProject = async (
 
   const missingMarkers = (
     await Promise.all(
-      requiredMarkers.map(async (marker) => {
-        try {
-          await promises.access(path.join(normalizedCwd, marker));
-          return undefined;
-        } catch {
-          return marker;
-        }
-      }),
+      requiredMarkers.map(async (marker) =>
+        (await exists(marker)) ? undefined : marker,
+      ),
     )
   ).filter(Boolean);
 
@@ -239,8 +237,14 @@ const isWithinTurboStarterProject = async (
     };
   }
 
-  return {
-    valid: true,
-    kit: (await exists("packages/ai/chat/package.json")) ? "ai" : "core",
-  };
+  const isAi = await exists("packages/ai/chat/package.json");
+  const isCore = await exists("packages/billing/web/package.json");
+  if (isAi === isCore) {
+    return {
+      valid: false,
+      reason: "Could not determine whether this is a Core or AI project.",
+    };
+  }
+
+  return { valid: true, kit: isAi ? "ai" : "core" };
 };

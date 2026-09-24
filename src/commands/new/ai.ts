@@ -34,13 +34,6 @@ const chooseMobile = async () => {
   return Boolean(result.mobile);
 };
 
-const replaceExactly = async (file: string, before: string, after: string) => {
-  const content = await promises.readFile(file, "utf8");
-  if (!content.includes(before))
-    throw new Error(`AI template changed: expected text missing from ${file}`);
-  await promises.writeFile(file, content.replace(before, after));
-};
-
 const removeMobile = async (cwd: string) => {
   await Promise.all(
     [
@@ -79,26 +72,30 @@ const removeMobile = async (cwd: string) => {
   );
 
   const authServer = join(cwd, "packages/auth/src/server.ts");
-  await replaceExactly(
-    authServer,
+  let server = await promises.readFile(authServer, "utf8");
+  for (const line of [
     'import { expo } from "@better-auth/expo";\n',
-    "",
-  );
-  await replaceExactly(authServer, '    "turbostarter-ai://",\n', "");
-  await replaceExactly(authServer, "    expo(),\n", "");
+    '    "turbostarter-ai://",\n',
+    "    expo(),\n",
+  ]) {
+    if (!server.includes(line))
+      throw new Error(
+        `AI template changed: expected text missing from ${authServer}`,
+      );
+    server = server.replace(line, "");
+  }
+  await promises.writeFile(authServer, server);
 };
 
 const aiGroups = [
   {
     title: "AI Gateway",
-    path: "apps/web",
     entries: [
       { key: "AI_GATEWAY_API_KEY", label: "AI Gateway API key", secret: true },
     ],
   },
   {
     title: "other model providers",
-    path: "apps/web",
     entries: [
       ["OPENAI_API_KEY", "OpenAI API key"],
       ["ANTHROPIC_API_KEY", "Anthropic API key"],
@@ -110,7 +107,6 @@ const aiGroups = [
   },
   {
     title: "AI tools",
-    path: "apps/web",
     entries: [
       ["BRAVE_SEARCH_API_KEY", "Brave Search API key"],
       ["EXA_API_KEY", "Exa API key"],
@@ -120,7 +116,6 @@ const aiGroups = [
   },
   {
     title: "voice",
-    path: "apps/web",
     entries: [
       { key: "ELEVENLABS_API_KEY", label: "ElevenLabs API key", secret: true },
       { key: "LIVEKIT_API_KEY", label: "LiveKit API key", secret: true },
@@ -130,7 +125,6 @@ const aiGroups = [
   },
   {
     title: "S3 storage",
-    path: "apps/web",
     entries: [
       { key: "S3_REGION", label: "S3 region" },
       { key: "S3_BUCKET", label: "S3 bucket" },
@@ -170,20 +164,20 @@ export const initializeAiProject = async (project: NewProject) => {
     createAuthSecret(),
   );
 
-  const databaseEnv = "env" in db ? db.env : undefined;
   const databaseUrl =
-    databaseEnv &&
-    typeof databaseEnv === "object" &&
-    "DATABASE_URL" in databaseEnv
-      ? databaseEnv.DATABASE_URL
+    "env" in db &&
+    db.env &&
+    typeof db.env === "object" &&
+    "DATABASE_URL" in db.env
+      ? db.env.DATABASE_URL
       : undefined;
   if (typeof databaseUrl === "string") {
     await setEnvValue(projectDir, ".", "DATABASE_URL", databaseUrl);
   }
-  if (configure) await configureEnvGroups(projectDir, aiGroups);
+  if (configure) await configureEnvGroups(projectDir, "apps/web", aiGroups);
 
   await installKitDependencies(projectDir);
-  await configureKitGit(projectDir, "ai", !mobile);
+  await configureKitGit(projectDir);
   if (db.type === ServiceType.LOCAL)
     await startServices(projectDir, [Service.DB]);
 };

@@ -22,7 +22,6 @@ import type { NewProject } from "./common";
 const edgeGroups = [
   {
     title: "contact and sender email",
-    path: ".",
     entries: [
       { key: "CONTACT_EMAIL", label: "Contact inbox email" },
       { key: "EMAIL_FROM", label: "Sender email address" },
@@ -30,7 +29,6 @@ const edgeGroups = [
   },
   {
     title: "authentication methods and OAuth",
-    path: ".",
     entries: [
       {
         key: "VITE_AUTH_PASSWORD",
@@ -64,7 +62,6 @@ const edgeGroups = [
   },
   {
     title: "Turnstile",
-    path: ".",
     entries: [
       { key: "VITE_TURNSTILE_SITE_KEY", label: "Turnstile site key" },
       {
@@ -76,7 +73,6 @@ const edgeGroups = [
   },
   {
     title: "Stripe",
-    path: ".",
     entries: [
       { key: "STRIPE_SECRET_KEY", label: "Stripe secret key", secret: true },
       {
@@ -88,7 +84,6 @@ const edgeGroups = [
   },
   {
     title: "Cloudflare Web Analytics",
-    path: ".",
     entries: [
       { key: "VITE_CF_WEB_ANALYTICS_TOKEN", label: "Web Analytics token" },
     ],
@@ -107,15 +102,11 @@ const wranglerVarKeys = new Set([
 
 interface EdgeWrangler {
   name: string;
-  vars?: Record<string, string | boolean>;
-  routes?: unknown;
-  flagship?: unknown;
-  ai?: unknown;
-  send_email?: { allowed_sender_addresses: string[] }[];
-  d1_databases?: { database_name: string; database_id: string }[];
-  kv_namespaces?: { id: string }[];
-  r2_buckets?: { bucket_name: string }[];
-  queues?: {
+  vars: Record<string, string | boolean>;
+  send_email: { allowed_sender_addresses: string[] }[];
+  d1_databases: { database_name: string }[];
+  r2_buckets: { bucket_name: string }[];
+  queues: {
     producers: { queue: string }[];
     consumers: { queue: string }[];
   };
@@ -124,51 +115,28 @@ interface EdgeWrangler {
 const configureWrangler = async (
   project: NewProject,
   cwd: string,
-  values: Partial<Record<string, string>>,
+  values: Record<string, string>,
 ) => {
   const file = join(cwd, "wrangler.jsonc");
+  await promises.copyFile(join(cwd, "wrangler.example.jsonc"), file);
   const source = await promises.readFile(file, "utf8");
   const config = JSON.parse(
     source.replace(/,(\s*[}\]])/g, "$1"),
   ) as EdgeWrangler;
-  if (
-    !config.vars ||
-    !config.send_email?.[0] ||
-    !config.d1_databases?.[0] ||
-    !config.kv_namespaces?.[0] ||
-    !config.r2_buckets?.[0] ||
-    !config.queues?.producers[0] ||
-    !config.queues.consumers[0]
-  ) {
-    throw new Error(
-      "Edge template changed: required Wrangler bindings missing.",
-    );
-  }
-
   config.name = project.name;
-  delete config.routes;
-  delete config.flagship;
-  delete config.ai;
-  config.vars.BETTER_AUTH_URL = "http://localhost:3000";
-  config.vars.VITE_URL = "http://localhost:3000";
-  config.vars.VITE_TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
-  delete config.vars.VITE_CF_WEB_ANALYTICS_TOKEN;
   for (const [key, value] of Object.entries(values)) {
-    if (!wranglerVarKeys.has(key) || value === undefined) continue;
+    if (!wranglerVarKeys.has(key)) continue;
     config.vars[key] =
       key === "VITE_AUTH_PASSWORD" || key === "VITE_AUTH_ANONYMOUS"
         ? value === "true"
         : value;
   }
 
-  const sender =
-    values.EMAIL_FROM ?? `${project.projectName} <noreply@example.com>`;
+  const sender = values.EMAIL_FROM;
   config.send_email[0].allowed_sender_addresses = [
     /<([^<>]+)>$/.exec(sender)?.[1] ?? sender,
   ];
   config.d1_databases[0].database_name = project.name;
-  config.d1_databases[0].database_id = "00000000-0000-0000-0000-000000000000";
-  config.kv_namespaces[0].id = "00000000000000000000000000000000";
   config.r2_buckets[0].bucket_name = project.name;
   config.queues.producers[0].queue = `${project.name}-jobs`;
   config.queues.consumers[0].queue = `${project.name}-jobs`;
@@ -194,7 +162,7 @@ export const initializeEdgeProject = async (project: NewProject) => {
     `${project.projectName} <noreply@example.com>`,
   );
   const configured = configure
-    ? await configureEnvGroups(projectDir, edgeGroups)
+    ? await configureEnvGroups(projectDir, ".", edgeGroups)
     : {};
   await configureWrangler(project, projectDir, {
     VITE_PRODUCT_NAME: project.projectName,
@@ -212,5 +180,5 @@ export const initializeEdgeProject = async (project: NewProject) => {
     spinner.fail("Failed to prepare local D1 database.");
     throw error;
   }
-  await configureKitGit(projectDir, "edge", true);
+  await configureKitGit(projectDir);
 };

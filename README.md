@@ -63,7 +63,7 @@ What it does:
 
 - **Core Kit:** Choose web, mobile, or extension apps and optionally configure its providers. Web is required.
 - **AI Kit:** Choose web with optional mobile, then optionally configure the database, AI providers, tools, voice, and storage. Local Postgres is started and migrated when selected.
-- **Edge Kit:** Create the single Cloudflare app with a local D1 database and optional integration configuration. Local development works without a Cloudflare login; remote AI, Flagship, email delivery, and deployment require later cloud setup.
+- **Edge Kit:** Create the single Cloudflare app from its safe `wrangler.example.jsonc`, with a local D1 database and optional integrations. Local development works without a Cloudflare login; remote AI, Flagship, email delivery, and deployment require later cloud setup.
 - For every kit, the CLI clones its repository, prepares local environment files, installs dependencies, and points `upstream` at the selected kit.
 
 ### Managing existing project
