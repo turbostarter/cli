@@ -71,5 +71,5 @@ const edgeGroups = [
   },
 ];
 
-export const configureEdgeProviders = async (cwd: string) =>
+export const configureProviders = async (cwd: string) =>
   configureEnvGroups(cwd, ".", edgeGroups);

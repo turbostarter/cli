@@ -6,15 +6,15 @@ import { logger } from "~/utils";
 
 import {
   cloneKit,
-  configureKitGit,
+  configureGit,
   getConfigureProvidersStep,
-  installKitDependencies,
+  installtDependencies,
 } from "../common";
 import { startServices } from "../services";
 
 import { getApps, modifyFilesForMissingApps } from "./apps";
 import { setEnvironmentVariables } from "./config/env";
-import { prepareCoreEnvironment } from "./environment";
+import { prepareEnvironment } from "./environment";
 import { updateProvidersFiles } from "./provider-files";
 import { getProvidersConfig } from "./providers";
 
@@ -38,7 +38,7 @@ export const initializeCoreProject = async ({
 
   const projectDir = await cloneKit({ cwd, name, projectName }, Kit.CORE);
   await modifyFilesForMissingApps(projectDir, apps);
-  await prepareCoreEnvironment({ cwd, name, projectName }, projectDir, apps);
+  await prepareEnvironment({ cwd, name, projectName }, projectDir, apps);
 
   if (config) {
     await setEnvironmentVariables(projectDir, config.env);
@@ -52,8 +52,8 @@ export const initializeCoreProject = async ({
     });
   }
 
-  await installKitDependencies(projectDir);
-  await configureKitGit(projectDir);
+  await installtDependencies(projectDir);
+  await configureGit(projectDir);
 
   if (!config || config.db.type === ServiceType.LOCAL)
     await startServices(projectDir, [Service.DB]);

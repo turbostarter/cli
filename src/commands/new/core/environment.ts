@@ -1,10 +1,10 @@
-import { copyEnvExamples, createAuthSecret, setEnvValue } from "../common";
+import { copyEnvExamples, setEnvValue } from "../common";
 
 import { App } from "./config/definitions";
 
 import type { NewProject } from "../common";
 
-export const prepareCoreEnvironment = async (
+export const prepareEnvironment = async (
   project: NewProject,
   cwd: string,
   apps: App[],
@@ -16,5 +16,4 @@ export const prepareCoreEnvironment = async (
     ...(apps.includes(App.EXTENSION) ? ["apps/extension"] : []),
   ]);
   await setEnvValue(cwd, ".", "PRODUCT_NAME", project.projectName);
-  await setEnvValue(cwd, "apps/web", "BETTER_AUTH_SECRET", createAuthSecret());
 };

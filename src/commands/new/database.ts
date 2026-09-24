@@ -15,15 +15,15 @@ const cloudDatabaseSchema = z.object({ DATABASE_URL: databaseUrlSchema });
 const getDatabaseCloudConfig = async (
   configuredEnv: Record<string, string>,
 ) => {
-  const urlKey = "DATABASE_URL";
+  const key = "DATABASE_URL";
 
   const answer = await prompts(
     [
       {
         type: "text",
-        name: urlKey,
+        name: key,
         message: "Enter your database URL",
-        initial: configuredEnv[urlKey],
+        initial: configuredEnv[key],
         validate: (value: string) =>
           databaseUrlSchema.safeParse(value).success ||
           "Database URL is required.",

@@ -23,18 +23,25 @@ export const servicesPackages: Record<Service, string> = {
 
 export const products = {
   [Kit.CORE]: {
+    label: "Core Kit",
+    docs: "https://turbostarter.dev/docs",
     repository: "turbostarter/core",
     url: "https://www.turbostarter.dev",
   },
   [Kit.AI]: {
+    label: "AI Kit",
+    docs: "https://www.turbostarter.dev/ai/docs",
     repository: "turbostarter/ai",
     url: "https://www.turbostarter.dev/ai",
   },
   [Kit.EDGE]: {
+    label: "Edge Kit",
+    docs: "https://www.turbostarter.dev/edge/docs",
     repository: "turbostarter/edge",
     url: "https://www.turbostarter.dev/edge",
   },
   openclaw: {
+    label: "OpenClaw Kit",
     repository: "turbostarter/openclaw",
     url: "https://www.turbostarter.dev/openclaw",
   },

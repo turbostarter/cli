@@ -6,9 +6,9 @@ import { logger } from "~/utils";
 
 import {
   cloneKit,
-  configureKitGit,
+  configureGit,
   getConfigureProvidersStep,
-  installKitDependencies,
+  installtDependencies,
 } from "../common";
 
 import { prepareLocalD1 } from "./database";
@@ -26,7 +26,7 @@ export const initializeEdgeProject = async (project: NewProject) => {
   const projectDir = await cloneKit(project, Kit.EDGE);
   const values = await prepareEdgeEnvironment(project, projectDir, configure);
   await configureWrangler(project, projectDir, values);
-  await installKitDependencies(projectDir);
+  await installtDependencies(projectDir);
   await prepareLocalD1(projectDir);
-  await configureKitGit(projectDir);
+  await configureGit(projectDir);
 };

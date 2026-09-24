@@ -4,16 +4,21 @@ import color from "picocolors";
 import prompts from "prompts";
 import { z } from "zod";
 
-import { Kit } from "~/config";
-import { logAddOnUpsell, logger, onCancel, slugify } from "~/utils";
+import { config, Kit } from "~/config";
+import { logger, onCancel, slugify } from "~/utils";
 
 import { initializeAiProject } from "./ai";
-import { kits } from "./common";
 import { initializeCoreProject } from "./core";
 import { initializeEdgeProject } from "./edge";
 import { validatePrerequisites } from "./prerequisites";
 
 import type { NewProject } from "./common";
+
+const projectInitializer = {
+  [Kit.CORE]: initializeCoreProject,
+  [Kit.AI]: initializeAiProject,
+  [Kit.EDGE]: initializeEdgeProject,
+} satisfies Record<Kit, (project: NewProject) => Promise<void>>;
 
 const kitSchema = z.enum(Kit);
 
@@ -36,9 +41,12 @@ const selectKit = async (): Promise<Kit> => {
       type: "select",
       name: "kit",
       message: "Which kit do you want to use?",
-      choices: Object.entries(kits).map(([value, kit]) => ({
-        title: kit.label,
-        value,
+      choices: Object.values(Kit).map((kit) => ({
+        title:
+          kit === Kit.EDGE
+            ? `${config.products[kit].label} (new)`
+            : config.products[kit].label,
+        value: kit,
       })),
     },
     { onCancel },
@@ -72,7 +80,7 @@ export const newCommand = new Command()
   )
   .option(
     "-k, --kit <kit>",
-    `skip kit selection (${Object.values(Kit).join(", ")})`,
+    `specify the kit you want to use (${Object.values(Kit).join(", ")})`,
   )
   .action(async (opts: z.infer<typeof newOptionsSchema>) => {
     try {
@@ -82,30 +90,21 @@ export const newCommand = new Command()
       await validatePrerequisites();
 
       const projectName = await getProjectName();
-      const project: NewProject = {
+      const project = {
         cwd: path.resolve(options.cwd),
         name: slugify(projectName),
         projectName,
-      };
+      } satisfies NewProject;
 
-      if (kit === Kit.CORE) await initializeCoreProject(project);
-      if (kit === Kit.AI) await initializeAiProject(project);
-      if (kit === Kit.EDGE) await initializeEdgeProject(project);
+      await projectInitializer[kit](project);
 
       logger.log(
-        `\n🎉 ${kits[kit].label} is ready in ${color.greenBright(join(project.cwd, project.name))}!\n`,
+        `\n🎉 ${config.products[kit].label} is ready in ${color.greenBright(join(project.cwd, project.name))}!\n`,
       );
       logger.log(`> cd ${project.name}\n> pnpm dev\n`);
-      if (kit === Kit.AI)
-        logger.info("AI features need the provider keys you choose to use.");
-      if (kit === Kit.EDGE)
-        logger.info(
-          "Edge keeps all service bindings. pnpm dev needs Cloudflare credentials and your own Flagship app ID because AI and Flagship use remote bindings.",
-        );
-      logger.info(`Problems? ${color.underline(kits[kit].docs)}`);
-      if (kit === Kit.CORE) await logAddOnUpsell("new_success");
+      logger.info(`Problems? ${color.underline(config.products[kit].docs)}`);
     } catch (error) {
       logger.error(error);
-      process.exitCode = 1;
+      process.exit(1);
     }
   });

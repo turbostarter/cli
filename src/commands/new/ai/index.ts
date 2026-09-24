@@ -6,16 +6,16 @@ import { logger } from "~/utils";
 
 import {
   cloneKit,
-  configureKitGit,
+  configureGit,
   getConfigureProvidersStep,
-  installKitDependencies,
+  installtDependencies,
 } from "../common";
 import { getDatabaseConfig } from "../database";
 import { startServices } from "../services";
 
-import { prepareAiEnvironment } from "./environment";
+import { prepareEnvironment } from "./environment";
 import { chooseMobile, removeMobile } from "./mobile";
-import { configureAiProviders } from "./providers";
+import { configureProviders } from "./providers";
 
 import type { NewProject } from "../common";
 
@@ -30,15 +30,20 @@ export const initializeAiProject = async (project: NewProject) => {
     `\nCreating a new AI Kit project in ${color.greenBright(join(project.cwd, project.name))}.\n`,
   );
   const projectDir = await cloneKit(project, Kit.AI);
-  if (!mobile) await removeMobile(projectDir);
+  if (!mobile) {
+    await removeMobile(projectDir);
+  }
 
   const databaseUrl =
     db.type === ServiceType.CLOUD ? db.env.DATABASE_URL : undefined;
-  await prepareAiEnvironment(project, projectDir, mobile, databaseUrl);
-  if (configure) await configureAiProviders(projectDir);
+  await prepareEnvironment(project, projectDir, mobile, databaseUrl);
+  if (configure) {
+    await configureProviders(projectDir);
+  }
 
-  await installKitDependencies(projectDir);
-  await configureKitGit(projectDir);
-  if (db.type === ServiceType.LOCAL)
+  await installtDependencies(projectDir);
+  await configureGit(projectDir);
+  if (db.type === ServiceType.LOCAL) {
     await startServices(projectDir, [Service.DB]);
+  }
 };

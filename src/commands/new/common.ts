@@ -1,5 +1,4 @@
 import { execa } from "execa";
-import { randomBytes } from "node:crypto";
 import { promises } from "node:fs";
 import { join } from "node:path";
 import ora from "ora";
@@ -7,7 +6,7 @@ import color from "picocolors";
 import prompts from "prompts";
 import { z } from "zod";
 
-import { config, Kit } from "~/config";
+import { config } from "~/config";
 import {
   hasSshAccess,
   httpsUrl,
@@ -17,29 +16,13 @@ import {
   sshUrl,
 } from "~/utils";
 
+import type { Kit } from "~/config";
+
 export interface NewProject {
   cwd: string;
   name: string;
   projectName: string;
 }
-
-export const kits = {
-  [Kit.CORE]: {
-    label: "Core Kit",
-    ...config.products[Kit.CORE],
-    docs: "https://turbostarter.dev/docs",
-  },
-  [Kit.AI]: {
-    label: "AI Kit",
-    ...config.products[Kit.AI],
-    docs: "https://www.turbostarter.dev/ai/docs",
-  },
-  [Kit.EDGE]: {
-    label: "Edge Kit",
-    ...config.products[Kit.EDGE],
-    docs: "https://www.turbostarter.dev/edge/docs",
-  },
-} as const;
 
 const configureSchema = z.object({ configure: z.boolean() });
 const optionalBooleanSchema = z.union([
@@ -65,10 +48,10 @@ export const getConfigureProvidersStep = async (): Promise<boolean> => {
 
 export const cloneKit = async (project: NewProject, kit: Kit) => {
   const spinner = ora(
-    `Cloning ${kits[kit].label} into ${project.name}...`,
+    `Cloning ${config.products[kit].label} into ${project.name}...`,
   ).start();
   try {
-    const repository = kits[kit].repository;
+    const repository = config.products[kit].repository;
     const url = (await hasSshAccess())
       ? sshUrl(repository)
       : httpsUrl(repository);
@@ -82,15 +65,15 @@ export const cloneKit = async (project: NewProject, kit: Kit) => {
     spinner.succeed("Repository successfully pulled!");
     return join(project.cwd, project.name);
   } catch (error) {
-    spinner.fail(`Failed to clone ${kits[kit].label}.`);
+    spinner.fail(`Failed to clone ${config.products[kit].label}.`);
     logger.info(
-      `Need access to ${kits[kit].label}? ${color.underline(kits[kit].url)}`,
+      `Need access to ${config.products[kit].label}? ${color.underline(config.products[kit].url)}`,
     );
     throw error;
   }
 };
 
-export const configureKitGit = async (cwd: string) => {
+export const configureGit = async (cwd: string) => {
   const spinner = ora("Configuring Git...").start();
   try {
     const { stdout: origin } = await execa(
@@ -149,8 +132,6 @@ export const setEnvValue = async (
   await promises.writeFile(file, lines.join("\n"));
 };
 
-export const createAuthSecret = () => randomBytes(32).toString("base64url");
-
 export interface EnvPromptGroup {
   title: string;
   entries: {
@@ -182,7 +163,7 @@ export const configureEnvGroups = async (
     for (const entry of group.entries) {
       const answer = await prompts(
         {
-          type: entry.secret ? "password" : "text",
+          type: "text",
           name: "value",
           message: entry.label,
           validate: (value: string) =>
@@ -203,7 +184,7 @@ export const configureEnvGroups = async (
   return configured;
 };
 
-export const installKitDependencies = async (cwd: string) => {
+export const installtDependencies = async (cwd: string) => {
   const spinner = ora("Installing dependencies...").start();
   try {
     await execa("pnpm", ["install"], { cwd });

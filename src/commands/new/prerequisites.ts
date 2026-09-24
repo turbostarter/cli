@@ -6,13 +6,10 @@ import { logger } from "~/utils/logger";
 
 export const validateNodeInstalled = async () => {
   try {
-    const { stdout } = await execa("node", ["--version"]);
-    if (Number(/^v(\d+)/.exec(stdout)?.[1]) < 24) {
-      throw new Error("Node.js 24 or newer is required.");
-    }
+    await execa("node", ["--version"]);
   } catch {
     logger.error(
-      "Node.js 24 or newer is required. Please update Node.js and try again.\n",
+      "Node.js is not installed. Please install Node.js and try again.\n",
     );
     logger.info(
       `To install Node.js, visit: ${color.underline("https://nodejs.org/en/")}`,

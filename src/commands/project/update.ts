@@ -67,8 +67,7 @@ export const projectUpdateCommand = new Command()
             `Successfully pulled latest changes from ${color.cyan(result.repository)}.`,
           );
         }
-        if (result.repository === config.products[Kit.CORE].repository)
-          await logAddOnUpsell("update");
+        await logAddOnUpsell("update");
         return;
       }
 
