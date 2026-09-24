@@ -13,7 +13,7 @@ export const startServices = async (cwd: string, services: Service[]) => {
   const spinner = ora(`Starting local services...`).start();
 
   try {
-    await execa("docker", ["compose", "up", "-d", "--wait", ...services], {
+    await execa("pnpm", ["services:start", ...services], {
       cwd,
     });
     await execa(
