@@ -4,7 +4,7 @@ import { promises } from "fs";
 import ora from "ora";
 import path from "path";
 import color from "picocolors";
-import { z } from "zod";
+import * as z from "zod";
 
 import { config, Kit } from "~/config";
 import {

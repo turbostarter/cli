@@ -1,10 +1,11 @@
 import { execa } from "execa";
+import _ from "lodash";
 import { promises } from "node:fs";
 import { join } from "node:path";
 import ora from "ora";
 import color from "picocolors";
 import prompts from "prompts";
-import { z } from "zod";
+import * as z from "zod";
 
 import { config } from "~/config";
 import {
@@ -132,6 +133,32 @@ export const setEnvValue = async (
   await promises.writeFile(file, lines.join("\n"));
 };
 
+export const setEnvironmentVariablesInPaths = async (
+  projectDir: string,
+  variables: Record<string, string>,
+  paths: Record<string, string[]>,
+) => {
+  const spinner = ora(`Setting environment variables...`).start();
+
+  try {
+    for (const [key, value] of Object.entries(variables)) {
+      const pathsForKey = _.keys(
+        _.pickBy(paths, (values) => _.includes(values, key)),
+      );
+
+      for (const path of pathsForKey) {
+        await setEnvValue(projectDir, path, key, value);
+      }
+    }
+
+    spinner.succeed("Environment variables successfully set!");
+  } catch (error) {
+    logger.error(error);
+    logger.error("Failed to set environment variables!");
+    process.exit(1);
+  }
+};
+
 export interface EnvPromptGroup {
   title: string;
   entries: {
@@ -142,11 +169,7 @@ export interface EnvPromptGroup {
   }[];
 }
 
-export const configureEnvGroups = async (
-  cwd: string,
-  path: string,
-  groups: EnvPromptGroup[],
-) => {
+export const configureEnvGroups = async (groups: EnvPromptGroup[]) => {
   const configured: Record<string, string> = {};
   for (const group of groups) {
     const selected = await prompts(
@@ -176,7 +199,6 @@ export const configureEnvGroups = async (
       );
       const value = z.string().trim().default("").parse(answer.value);
       if (value) {
-        await setEnvValue(cwd, path, entry.key, value);
         configured[entry.key] = value;
       }
     }
@@ -184,7 +206,7 @@ export const configureEnvGroups = async (
   return configured;
 };
 
-export const installtDependencies = async (cwd: string) => {
+export const installDependencies = async (cwd: string) => {
   const spinner = ora("Installing dependencies...").start();
   try {
     await execa("pnpm", ["install"], { cwd });

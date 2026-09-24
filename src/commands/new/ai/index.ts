@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import color from "picocolors";
 
+import { envInPaths } from "~/commands/new/ai/config";
 import { Kit, Service, ServiceType } from "~/config";
 import { logger } from "~/utils";
 
@@ -8,9 +9,9 @@ import {
   cloneKit,
   configureGit,
   getConfigureProvidersStep,
-  installtDependencies,
+  installDependencies,
+  setEnvironmentVariablesInPaths,
 } from "../common";
-import { getDatabaseConfig } from "../database";
 import { startServices } from "../services";
 
 import { prepareEnvironment } from "./environment";
@@ -21,10 +22,10 @@ import type { NewProject } from "../common";
 
 export const initializeAiProject = async (project: NewProject) => {
   const mobile = await chooseMobile();
-  const configure = await getConfigureProvidersStep();
-  const db = configure
-    ? await getDatabaseConfig({})
-    : { type: ServiceType.LOCAL };
+  const shouldConfigureProviders = await getConfigureProvidersStep();
+  const config = shouldConfigureProviders
+    ? await configureProviders()
+    : undefined;
 
   logger.log(
     `\nCreating a new AI Kit project in ${color.greenBright(join(project.cwd, project.name))}.\n`,
@@ -34,16 +35,14 @@ export const initializeAiProject = async (project: NewProject) => {
     await removeMobile(projectDir);
   }
 
-  const databaseUrl =
-    db.type === ServiceType.CLOUD ? db.env.DATABASE_URL : undefined;
-  await prepareEnvironment(project, projectDir, mobile, databaseUrl);
-  if (configure) {
-    await configureProviders(projectDir);
+  await prepareEnvironment(project, projectDir, mobile);
+  if (config) {
+    await setEnvironmentVariablesInPaths(projectDir, config.env, envInPaths);
   }
 
-  await installtDependencies(projectDir);
+  await installDependencies(projectDir);
   await configureGit(projectDir);
-  if (db.type === ServiceType.LOCAL) {
+  if (!config || config.db.type === ServiceType.LOCAL) {
     await startServices(projectDir, [Service.DB]);
   }
 };

@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import color from "picocolors";
 
+import { envInPaths } from "~/commands/new/core/config/definitions";
 import { Kit, Service, ServiceType } from "~/config";
 import { logger } from "~/utils";
 
@@ -8,12 +9,12 @@ import {
   cloneKit,
   configureGit,
   getConfigureProvidersStep,
-  installtDependencies,
+  installDependencies,
+  setEnvironmentVariablesInPaths,
 } from "../common";
 import { startServices } from "../services";
 
 import { getApps, modifyFilesForMissingApps } from "./apps";
-import { setEnvironmentVariables } from "./config/env";
 import { prepareEnvironment } from "./environment";
 import { updateProvidersFiles } from "./provider-files";
 import { getProvidersConfig } from "./providers";
@@ -41,7 +42,7 @@ export const initializeCoreProject = async ({
   await prepareEnvironment({ cwd, name, projectName }, projectDir, apps);
 
   if (config) {
-    await setEnvironmentVariables(projectDir, config.env);
+    await setEnvironmentVariablesInPaths(projectDir, config.env, envInPaths);
     await updateProvidersFiles(projectDir, {
       email: config.email.provider,
       storage: config.storage.provider,
@@ -52,9 +53,10 @@ export const initializeCoreProject = async ({
     });
   }
 
-  await installtDependencies(projectDir);
+  await installDependencies(projectDir);
   await configureGit(projectDir);
 
-  if (!config || config.db.type === ServiceType.LOCAL)
+  if (!config || config.db.type === ServiceType.LOCAL) {
     await startServices(projectDir, [Service.DB]);
+  }
 };

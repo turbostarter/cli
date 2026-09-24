@@ -1,6 +1,6 @@
 import prompts from "prompts";
 import { Node, SyntaxKind } from "ts-morph";
-import { z } from "zod";
+import * as z from "zod";
 
 import { onCancel } from "~/utils";
 import {

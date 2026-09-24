@@ -24,11 +24,6 @@ export const EnvPath = {
   EXTENSION: "./apps/extension",
 } as const;
 
-export const EnvFile = {
-  EXAMPLE: ".env.example",
-  LOCAL: ".env.local",
-} as const;
-
 export const App = {
   WEB: "web",
   MOBILE: "mobile",
@@ -107,7 +102,6 @@ export type StorageProvider =
   (typeof StorageProvider)[keyof typeof StorageProvider];
 export type EmailProvider = (typeof EmailProvider)[keyof typeof EmailProvider];
 export type EnvPath = (typeof EnvPath)[keyof typeof EnvPath];
-export type EnvFile = (typeof EnvFile)[keyof typeof EnvFile];
 export type App = (typeof App)[keyof typeof App];
 export type BillingProvider = {
   [

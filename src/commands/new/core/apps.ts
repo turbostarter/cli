@@ -1,6 +1,6 @@
 import color from "picocolors";
 import prompts from "prompts";
-import { z } from "zod";
+import * as z from "zod";
 
 import { logger, onCancel } from "~/utils";
 import { applyFileModifications } from "~/utils/file";

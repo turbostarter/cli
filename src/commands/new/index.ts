@@ -2,7 +2,7 @@ import { Command } from "commander";
 import path, { join } from "node:path";
 import color from "picocolors";
 import prompts from "prompts";
-import { z } from "zod";
+import * as z from "zod";
 
 import { config, Kit } from "~/config";
 import { logger, onCancel, slugify } from "~/utils";

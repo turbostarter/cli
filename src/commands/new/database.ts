@@ -1,5 +1,5 @@
 import prompts from "prompts";
-import { z } from "zod";
+import * as z from "zod";
 
 import { ServiceType } from "~/config";
 import { onCancel } from "~/utils";
