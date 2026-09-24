@@ -1,10 +1,10 @@
-import { App } from "~/config";
+import { App } from "../definitions";
 
 import { getAnalyticsExtensionConfig } from "./extension";
 import { getAnalyticsMobileConfig } from "./mobile";
 import { getAnalyticsWebConfig } from "./web";
 
-import type { AnalyticsProvider } from "~/config";
+import type { AnalyticsProvider } from "../definitions";
 
 export const getAnalyticsConfig = async (
   apps: App[],

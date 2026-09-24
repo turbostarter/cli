@@ -1,9 +1,9 @@
-import { App } from "~/config";
+import { App } from "../definitions";
 
 import { getBillingMobileConfig } from "./mobile";
 import { getBillingWebConfig } from "./web";
 
-import type { BillingProvider } from "~/config";
+import type { BillingProvider } from "../definitions";
 
 export const getBillingConfig = async (
   apps: App[],

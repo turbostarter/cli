@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { EmailProvider, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
+
+import { EmailProvider, coreEnv } from "./definitions";
 
 const getEmailProvider = async (): Promise<{
   provider: EmailProvider;
@@ -34,9 +35,9 @@ const getEmailProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.email.resend.apiKey,
+            name: coreEnv.email.resend.apiKey,
             message: "Enter your Resend API key",
-            initial: configuredEnv[config.env.email.resend.apiKey],
+            initial: configuredEnv[coreEnv.email.resend.apiKey],
           },
         ],
         {
@@ -48,9 +49,9 @@ const getEmailProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.email.sendgrid.apiKey,
+            name: coreEnv.email.sendgrid.apiKey,
             message: "Enter your Sendgrid API key",
-            initial: configuredEnv[config.env.email.sendgrid.apiKey],
+            initial: configuredEnv[coreEnv.email.sendgrid.apiKey],
           },
         ],
         {
@@ -62,9 +63,9 @@ const getEmailProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.email.plunk.apiKey,
+            name: coreEnv.email.plunk.apiKey,
             message: "Enter your Plunk API key",
-            initial: configuredEnv[config.env.email.plunk.apiKey],
+            initial: configuredEnv[coreEnv.email.plunk.apiKey],
           },
         ],
         {
@@ -76,9 +77,9 @@ const getEmailProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.email.postmark.apiKey,
+            name: coreEnv.email.postmark.apiKey,
             message: "Enter your Postmark API key",
-            initial: configuredEnv[config.env.email.postmark.apiKey],
+            initial: configuredEnv[coreEnv.email.postmark.apiKey],
           },
         ],
         {
@@ -90,22 +91,22 @@ const getEmailProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.email.mailgun.apiKey,
+            name: coreEnv.email.mailgun.apiKey,
             message: "Enter your Mailgun API key",
-            initial: configuredEnv[config.env.email.mailgun.apiKey],
+            initial: configuredEnv[coreEnv.email.mailgun.apiKey],
           },
           {
             type: "text",
-            name: config.env.email.mailgun.domain,
+            name: coreEnv.email.mailgun.domain,
             message: "Enter your Mailgun domain",
-            initial: configuredEnv[config.env.email.mailgun.domain],
+            initial: configuredEnv[coreEnv.email.mailgun.domain],
           },
           {
             type: "text",
-            name: config.env.email.mailgun.apiUrl,
+            name: coreEnv.email.mailgun.apiUrl,
             message: "Enter your Mailgun API URL",
             initial:
-              configuredEnv[config.env.email.mailgun.apiUrl] ??
+              configuredEnv[coreEnv.email.mailgun.apiUrl] ??
               "https://api.mailgun.net",
           },
         ],
@@ -118,27 +119,27 @@ const getEmailProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.email.nodemailer.user,
+            name: coreEnv.email.nodemailer.user,
             message: "Enter your Nodemailer user",
-            initial: configuredEnv[config.env.email.nodemailer.user],
+            initial: configuredEnv[coreEnv.email.nodemailer.user],
           },
           {
             type: "text",
-            name: config.env.email.nodemailer.password,
+            name: coreEnv.email.nodemailer.password,
             message: "Enter your Nodemailer user password",
-            initial: configuredEnv[config.env.email.nodemailer.password],
+            initial: configuredEnv[coreEnv.email.nodemailer.password],
           },
           {
             type: "text",
-            name: config.env.email.nodemailer.host,
+            name: coreEnv.email.nodemailer.host,
             message: "Enter your Nodemailer host",
-            initial: configuredEnv[config.env.email.nodemailer.host],
+            initial: configuredEnv[coreEnv.email.nodemailer.host],
           },
           {
             type: "number",
-            name: config.env.email.nodemailer.port,
+            name: coreEnv.email.nodemailer.port,
             message: "Enter your Nodemailer port",
-            initial: configuredEnv[config.env.email.nodemailer.port],
+            initial: configuredEnv[coreEnv.email.nodemailer.port],
           },
         ],
         {

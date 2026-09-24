@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { FlagsProvider, App, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
+
+import { FlagsProvider, App, coreEnv } from "../definitions";
 
 const getFlagsWebProvider = async (): Promise<{
   provider: FlagsProvider[typeof App.WEB];
@@ -36,16 +37,16 @@ const getFlagsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.flags[App.WEB].posthog.key,
+            name: coreEnv.flags[App.WEB].posthog.key,
             message: "Enter your PostHog key",
-            initial: configuredEnv[config.env.flags[App.WEB].posthog.key],
+            initial: configuredEnv[coreEnv.flags[App.WEB].posthog.key],
           },
           {
             type: "text",
-            name: config.env.flags[App.WEB].posthog.host,
+            name: coreEnv.flags[App.WEB].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.flags[App.WEB].posthog.host] ??
+              configuredEnv[coreEnv.flags[App.WEB].posthog.host] ??
               "https://us.i.posthog.com",
           },
         ],
@@ -56,17 +57,16 @@ const getFlagsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.flags[App.WEB].growthbook.clientKey,
+            name: coreEnv.flags[App.WEB].growthbook.clientKey,
             message: "Enter your GrowthBook client key",
-            initial:
-              configuredEnv[config.env.flags[App.WEB].growthbook.clientKey],
+            initial: configuredEnv[coreEnv.flags[App.WEB].growthbook.clientKey],
           },
           {
             type: "text",
-            name: config.env.flags[App.WEB].growthbook.apiHost,
+            name: coreEnv.flags[App.WEB].growthbook.apiHost,
             message: "Enter your GrowthBook API host",
             initial:
-              configuredEnv[config.env.flags[App.WEB].growthbook.apiHost] ??
+              configuredEnv[coreEnv.flags[App.WEB].growthbook.apiHost] ??
               "https://cdn.growthbook.io",
           },
         ],

@@ -11,7 +11,7 @@ import { getFlagsConfig } from "./config/flags";
 import { getMonitoringConfig } from "./config/monitoring";
 import { getStorageConfig } from "./config/storage";
 
-import type { App } from "~/config";
+import type { App } from "./config/definitions";
 
 export const getProvidersConfig = async (apps: App[]) => {
   logger.info(

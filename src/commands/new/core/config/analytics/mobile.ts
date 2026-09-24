@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { AnalyticsProvider, App, config } from "~/config";
 import { getLabel, logger, onCancel } from "~/utils";
+
+import { AnalyticsProvider, App, coreEnv } from "../definitions";
 
 const getAnalyticsMobileProvider = async (): Promise<{
   provider: AnalyticsProvider[typeof App.MOBILE];
@@ -41,10 +42,10 @@ const getAnalyticsMobileProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.MOBILE].mixpanel.token,
+            name: coreEnv.analytics[App.MOBILE].mixpanel.token,
             message: "Enter your Mixpanel token",
             initial:
-              configuredEnv[config.env.analytics[App.MOBILE].mixpanel.token],
+              configuredEnv[coreEnv.analytics[App.MOBILE].mixpanel.token],
           },
         ],
         { onCancel },
@@ -54,17 +55,16 @@ const getAnalyticsMobileProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.MOBILE].posthog.key,
+            name: coreEnv.analytics[App.MOBILE].posthog.key,
             message: "Enter your PostHog key",
-            initial:
-              configuredEnv[config.env.analytics[App.MOBILE].posthog.key],
+            initial: configuredEnv[coreEnv.analytics[App.MOBILE].posthog.key],
           },
           {
             type: "text",
-            name: config.env.analytics[App.MOBILE].posthog.host,
+            name: coreEnv.analytics[App.MOBILE].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.analytics[App.MOBILE].posthog.host] ??
+              configuredEnv[coreEnv.analytics[App.MOBILE].posthog.host] ??
               "https://us.posthog.com",
           },
         ],

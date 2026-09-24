@@ -1,9 +1,10 @@
 import prompts from "prompts";
 
-import { App, BillingProvider, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
 
-import type { BillingProvider as BillingProviderType } from "~/config";
+import { App, BillingProvider, coreEnv } from "../definitions";
+
+import type { BillingProvider as BillingProviderType } from "../definitions";
 
 const DodoPaymentsEnvironment = {
   TEST_MODE: "test_mode",
@@ -39,17 +40,16 @@ const getBillingWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.billing[App.WEB].stripe.secretKey,
+            name: coreEnv.billing[App.WEB].stripe.secretKey,
             message: "Enter your Stripe secret key",
-            initial:
-              configuredEnv[config.env.billing[App.WEB].stripe.secretKey],
+            initial: configuredEnv[coreEnv.billing[App.WEB].stripe.secretKey],
           },
           {
             type: "text",
-            name: config.env.billing[App.WEB].stripe.webhookSecret,
+            name: coreEnv.billing[App.WEB].stripe.webhookSecret,
             message: "Enter your Stripe webhook secret",
             initial:
-              configuredEnv[config.env.billing[App.WEB].stripe.webhookSecret],
+              configuredEnv[coreEnv.billing[App.WEB].stripe.webhookSecret],
           },
         ],
         { onCancel },
@@ -59,29 +59,25 @@ const getBillingWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.billing[App.WEB]["lemon-squeezy"].storeId,
+            name: coreEnv.billing[App.WEB]["lemon-squeezy"].storeId,
             message: "Enter your Lemon Squeezy store ID",
             initial:
-              configuredEnv[
-                config.env.billing[App.WEB]["lemon-squeezy"].storeId
-              ],
+              configuredEnv[coreEnv.billing[App.WEB]["lemon-squeezy"].storeId],
           },
           {
             type: "text",
-            name: config.env.billing[App.WEB]["lemon-squeezy"].apiKey,
+            name: coreEnv.billing[App.WEB]["lemon-squeezy"].apiKey,
             message: "Enter your Lemon Squeezy API key",
             initial:
-              configuredEnv[
-                config.env.billing[App.WEB]["lemon-squeezy"].apiKey
-              ],
+              configuredEnv[coreEnv.billing[App.WEB]["lemon-squeezy"].apiKey],
           },
           {
             type: "text",
-            name: config.env.billing[App.WEB]["lemon-squeezy"].signingSecret,
+            name: coreEnv.billing[App.WEB]["lemon-squeezy"].signingSecret,
             message: "Enter your Lemon Squeezy signing secret",
             initial:
               configuredEnv[
-                config.env.billing[App.WEB]["lemon-squeezy"].signingSecret
+                coreEnv.billing[App.WEB]["lemon-squeezy"].signingSecret
               ],
           },
         ],
@@ -92,24 +88,23 @@ const getBillingWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.billing[App.WEB].polar.accessToken,
+            name: coreEnv.billing[App.WEB].polar.accessToken,
             message: "Enter your Polar access token",
-            initial:
-              configuredEnv[config.env.billing[App.WEB].polar.accessToken],
+            initial: configuredEnv[coreEnv.billing[App.WEB].polar.accessToken],
           },
           {
             type: "text",
-            name: config.env.billing[App.WEB].polar.webhookSecret,
+            name: coreEnv.billing[App.WEB].polar.webhookSecret,
             message: "Enter your Polar webhook secret",
             initial:
-              configuredEnv[config.env.billing[App.WEB].polar.webhookSecret],
+              configuredEnv[coreEnv.billing[App.WEB].polar.webhookSecret],
           },
           {
             type: "text",
-            name: config.env.billing[App.WEB].polar.organizationSlug,
+            name: coreEnv.billing[App.WEB].polar.organizationSlug,
             message: "Enter your Polar organization slug",
             initial:
-              configuredEnv[config.env.billing[App.WEB].polar.organizationSlug],
+              configuredEnv[coreEnv.billing[App.WEB].polar.organizationSlug],
           },
         ],
         { onCancel },
@@ -119,25 +114,23 @@ const getBillingWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.billing[App.WEB]["dodo-payments"].apiKey,
+            name: coreEnv.billing[App.WEB]["dodo-payments"].apiKey,
             message: "Enter your Dodo Payments API key",
             initial:
-              configuredEnv[
-                config.env.billing[App.WEB]["dodo-payments"].apiKey
-              ],
+              configuredEnv[coreEnv.billing[App.WEB]["dodo-payments"].apiKey],
           },
           {
             type: "text",
-            name: config.env.billing[App.WEB]["dodo-payments"].webhookKey,
+            name: coreEnv.billing[App.WEB]["dodo-payments"].webhookKey,
             message: "Enter your Dodo Payments webhook key",
             initial:
               configuredEnv[
-                config.env.billing[App.WEB]["dodo-payments"].webhookKey
+                coreEnv.billing[App.WEB]["dodo-payments"].webhookKey
               ],
           },
           {
             type: "select",
-            name: config.env.billing[App.WEB]["dodo-payments"].environment,
+            name: coreEnv.billing[App.WEB]["dodo-payments"].environment,
             message: "Select your Dodo Payments environment",
             choices: Object.values(DodoPaymentsEnvironment).map(
               (environment) => ({
@@ -149,7 +142,7 @@ const getBillingWebProviderConfig = async (
               const environments = Object.values(DodoPaymentsEnvironment);
               const configured =
                 configuredEnv[
-                  config.env.billing[App.WEB]["dodo-payments"].environment
+                  coreEnv.billing[App.WEB]["dodo-payments"].environment
                 ];
               const index = environments.findIndex(
                 (environment) => environment === configured,

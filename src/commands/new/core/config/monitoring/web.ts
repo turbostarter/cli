@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { MonitoringProvider, App, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
+
+import { MonitoringProvider, App, coreEnv } from "../definitions";
 
 const getMonitoringWebProvider = async (): Promise<{
   provider: MonitoringProvider[typeof App.WEB];
@@ -34,9 +35,9 @@ const getMonitoringWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.monitoring[App.WEB].sentry.dsn,
+            name: coreEnv.monitoring[App.WEB].sentry.dsn,
             message: "Enter your Sentry DSN",
-            initial: configuredEnv[config.env.monitoring[App.WEB].sentry.dsn],
+            initial: configuredEnv[coreEnv.monitoring[App.WEB].sentry.dsn],
           },
         ],
         { onCancel },
@@ -46,16 +47,16 @@ const getMonitoringWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.monitoring[App.WEB].posthog.key,
+            name: coreEnv.monitoring[App.WEB].posthog.key,
             message: "Enter your PostHog key",
-            initial: configuredEnv[config.env.monitoring[App.WEB].posthog.key],
+            initial: configuredEnv[coreEnv.monitoring[App.WEB].posthog.key],
           },
           {
             type: "text",
-            name: config.env.monitoring[App.WEB].posthog.host,
+            name: coreEnv.monitoring[App.WEB].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.monitoring[App.WEB].posthog.host] ??
+              configuredEnv[coreEnv.monitoring[App.WEB].posthog.host] ??
               "https://us.posthog.com",
           },
         ],

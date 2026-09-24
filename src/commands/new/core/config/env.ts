@@ -1,10 +1,11 @@
 import _ from "lodash";
 import ora from "ora";
 
-import { envInPaths } from "~/config";
 import { logger } from "~/utils";
 
 import { setEnvValue } from "../../common";
+
+import { envInPaths } from "./definitions";
 
 export const setEnvironmentVariable = async (
   projectDir: string,

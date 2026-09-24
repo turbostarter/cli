@@ -1,10 +1,10 @@
 import color from "picocolors";
 import prompts from "prompts";
 
-import { App } from "~/config";
 import { logger, onCancel } from "~/utils";
 import { applyFileModifications } from "~/utils/file";
 
+import { App } from "./config/definitions";
 import { fileModificationsByMissingApp } from "./config/file-modifications";
 
 export const getApps = async () => {

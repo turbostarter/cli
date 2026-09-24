@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { AnalyticsProvider, App, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
+
+import { AnalyticsProvider, App, coreEnv } from "../definitions";
 
 const getAnalyticsExtensionProvider = async (): Promise<{
   provider: AnalyticsProvider[typeof App.EXTENSION];
@@ -36,23 +37,22 @@ const getAnalyticsExtensionProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.EXTENSION]["google-analytics"]
+            name: coreEnv.analytics[App.EXTENSION]["google-analytics"]
               .measurementId,
             message: "Enter your Google Analytics measurement ID",
             initial:
               configuredEnv[
-                config.env.analytics[App.EXTENSION]["google-analytics"]
+                coreEnv.analytics[App.EXTENSION]["google-analytics"]
                   .measurementId
               ],
           },
           {
             type: "text",
-            name: config.env.analytics[App.EXTENSION]["google-analytics"]
-              .secret,
+            name: coreEnv.analytics[App.EXTENSION]["google-analytics"].secret,
             message: "Enter your Google Analytics secret",
             initial:
               configuredEnv[
-                config.env.analytics[App.EXTENSION]["google-analytics"].secret
+                coreEnv.analytics[App.EXTENSION]["google-analytics"].secret
               ],
           },
         ],
@@ -63,17 +63,17 @@ const getAnalyticsExtensionProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.EXTENSION].posthog.key,
+            name: coreEnv.analytics[App.EXTENSION].posthog.key,
             message: "Enter your PostHog key",
             initial:
-              configuredEnv[config.env.analytics[App.EXTENSION].posthog.key],
+              configuredEnv[coreEnv.analytics[App.EXTENSION].posthog.key],
           },
           {
             type: "text",
-            name: config.env.analytics[App.EXTENSION].posthog.host,
+            name: coreEnv.analytics[App.EXTENSION].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.analytics[App.EXTENSION].posthog.host] ??
+              configuredEnv[coreEnv.analytics[App.EXTENSION].posthog.host] ??
               "https://us.posthog.com",
           },
         ],

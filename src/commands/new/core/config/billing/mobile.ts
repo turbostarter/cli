@@ -1,9 +1,10 @@
 import prompts from "prompts";
 
-import { App, BillingProvider, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
 
-import type { BillingProvider as BillingProviderType } from "~/config";
+import { App, BillingProvider, coreEnv } from "../definitions";
+
+import type { BillingProvider as BillingProviderType } from "../definitions";
 
 const getBillingMobileProvider = async (): Promise<{
   provider: BillingProviderType[typeof App.MOBILE];
@@ -34,37 +35,35 @@ const getBillingMobileProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.billing[App.MOBILE].revenuecat.appleApiKey,
+            name: coreEnv.billing[App.MOBILE].revenuecat.appleApiKey,
             message: "Enter your RevenueCat Apple API key",
             initial:
-              configuredEnv[
-                config.env.billing[App.MOBILE].revenuecat.appleApiKey
-              ],
+              configuredEnv[coreEnv.billing[App.MOBILE].revenuecat.appleApiKey],
           },
           {
             type: "text",
-            name: config.env.billing[App.MOBILE].revenuecat.googleApiKey,
+            name: coreEnv.billing[App.MOBILE].revenuecat.googleApiKey,
             message: "Enter your RevenueCat Google API key",
             initial:
               configuredEnv[
-                config.env.billing[App.MOBILE].revenuecat.googleApiKey
+                coreEnv.billing[App.MOBILE].revenuecat.googleApiKey
               ],
           },
           {
             type: "text",
-            name: config.env.billing[App.MOBILE].revenuecat.webhookSecret,
+            name: coreEnv.billing[App.MOBILE].revenuecat.webhookSecret,
             message: "Enter your RevenueCat webhook secret",
             initial:
               configuredEnv[
-                config.env.billing[App.MOBILE].revenuecat.webhookSecret
+                coreEnv.billing[App.MOBILE].revenuecat.webhookSecret
               ],
           },
           {
             type: "text",
-            name: config.env.billing[App.MOBILE].revenuecat.apiKey,
+            name: coreEnv.billing[App.MOBILE].revenuecat.apiKey,
             message: "Enter your RevenueCat API key",
             initial:
-              configuredEnv[config.env.billing[App.MOBILE].revenuecat.apiKey],
+              configuredEnv[coreEnv.billing[App.MOBILE].revenuecat.apiKey],
           },
         ],
         { onCancel },
@@ -74,29 +73,25 @@ const getBillingMobileProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.billing[App.MOBILE].superwall.appleApiKey,
+            name: coreEnv.billing[App.MOBILE].superwall.appleApiKey,
             message: "Enter your Superwall Apple API key",
             initial:
-              configuredEnv[
-                config.env.billing[App.MOBILE].superwall.appleApiKey
-              ],
+              configuredEnv[coreEnv.billing[App.MOBILE].superwall.appleApiKey],
           },
           {
             type: "text",
-            name: config.env.billing[App.MOBILE].superwall.googleApiKey,
+            name: coreEnv.billing[App.MOBILE].superwall.googleApiKey,
             message: "Enter your Superwall Google API key",
             initial:
-              configuredEnv[
-                config.env.billing[App.MOBILE].superwall.googleApiKey
-              ],
+              configuredEnv[coreEnv.billing[App.MOBILE].superwall.googleApiKey],
           },
           {
             type: "text",
-            name: config.env.billing[App.MOBILE].superwall.webhookSecret,
+            name: coreEnv.billing[App.MOBILE].superwall.webhookSecret,
             message: "Enter your Superwall webhook secret",
             initial:
               configuredEnv[
-                config.env.billing[App.MOBILE].superwall.webhookSecret
+                coreEnv.billing[App.MOBILE].superwall.webhookSecret
               ],
           },
         ],

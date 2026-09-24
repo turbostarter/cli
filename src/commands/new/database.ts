@@ -1,12 +1,12 @@
 import prompts from "prompts";
 
-import { config, Service, ServiceType } from "~/config";
+import { ServiceType } from "~/config";
 import { onCancel } from "~/utils";
 
 const getDatabaseCloudConfig = async (
   configuredEnv: Record<string, string>,
 ) => {
-  const urlKey = config.env[Service.DB].url;
+  const urlKey = "DATABASE_URL";
 
   return prompts(
     [

@@ -1,13 +1,14 @@
 import { Node, SyntaxKind } from "ts-morph";
 import { z } from "zod";
 
-import { App } from "~/config";
 import {
   directory,
   file,
   removeDependency,
   removePatchedDependency,
 } from "~/utils/file";
+
+import { App } from "./definitions";
 
 import type { ArrayLiteralExpression } from "ts-morph";
 

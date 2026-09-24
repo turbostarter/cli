@@ -1,6 +1,6 @@
-import { App } from "~/config";
-
 import { copyEnvExamples, createAuthSecret, setEnvValue } from "../common";
+
+import { App } from "./config/definitions";
 
 import type { NewProject } from "../common";
 

@@ -1,8 +1,9 @@
 import ora from "ora";
 
-import { providerConfigFiles } from "~/config";
 import { logger } from "~/utils";
 import { replaceInFiles } from "~/utils/file";
+
+import { providerConfigFiles } from "./config/definitions";
 
 import type {
   AnalyticsProvider,
@@ -11,7 +12,7 @@ import type {
   FlagsProvider,
   MonitoringProvider,
   StorageProvider,
-} from "~/config";
+} from "./config/definitions";
 
 export const updateProvidersFiles = async (
   cwd: string,

@@ -1,8 +1,9 @@
 import prompts from "prompts";
 
-import { config, StorageProvider } from "~/config";
 import { onCancel } from "~/utils";
 import { getLabel } from "~/utils";
+
+import { coreEnv, StorageProvider } from "./definitions";
 
 const getStorageProvider = async (): Promise<{
   provider: StorageProvider;
@@ -30,35 +31,35 @@ const getStorageProviderConfig = (configuredEnv: Record<string, string>) => {
     [
       {
         type: "text",
-        name: config.env.storage.s3.region,
+        name: coreEnv.storage.s3.region,
         message: "Enter your S3 region",
-        initial: configuredEnv[config.env.storage.s3.region] ?? "us-east-1",
+        initial: configuredEnv[coreEnv.storage.s3.region] ?? "us-east-1",
       },
       {
         type: "text",
-        name: config.env.storage.s3.endpoint,
+        name: coreEnv.storage.s3.endpoint,
         message: "Enter your S3 endpoint",
         initial:
-          configuredEnv[config.env.storage.s3.endpoint] ??
+          configuredEnv[coreEnv.storage.s3.endpoint] ??
           "https://s3.amazonaws.com",
       },
       {
         type: "text",
-        name: config.env.storage.s3.bucket,
+        name: coreEnv.storage.s3.bucket,
         message: "Enter your default S3 bucket name",
-        initial: configuredEnv[config.env.storage.s3.bucket],
+        initial: configuredEnv[coreEnv.storage.s3.bucket],
       },
       {
         type: "text",
-        name: config.env.storage.s3.accessKeyId,
+        name: coreEnv.storage.s3.accessKeyId,
         message: "Enter your S3 access key ID",
-        initial: configuredEnv[config.env.storage.s3.accessKeyId],
+        initial: configuredEnv[coreEnv.storage.s3.accessKeyId],
       },
       {
         type: "text",
-        name: config.env.storage.s3.secretAccessKey,
+        name: coreEnv.storage.s3.secretAccessKey,
         message: "Enter your S3 secret access key",
-        initial: configuredEnv[config.env.storage.s3.secretAccessKey],
+        initial: configuredEnv[coreEnv.storage.s3.secretAccessKey],
       },
     ],
     {

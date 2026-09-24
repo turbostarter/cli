@@ -1,10 +1,10 @@
-import { App } from "~/config";
+import { App } from "../definitions";
 
 import { getMonitoringExtensionConfig } from "./extension";
 import { getMonitoringMobileConfig } from "./mobile";
 import { getMonitoringWebConfig } from "./web";
 
-import type { MonitoringProvider } from "~/config";
+import type { MonitoringProvider } from "../definitions";
 
 export const getMonitoringConfig = async (
   apps: App[],

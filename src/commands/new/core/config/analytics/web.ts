@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { AnalyticsProvider, App, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
+
+import { AnalyticsProvider, App, coreEnv } from "../definitions";
 
 const getAnalyticsWebProvider = async (): Promise<{
   provider: AnalyticsProvider[typeof App.WEB];
@@ -34,21 +35,20 @@ const getAnalyticsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.WEB]["google-analytics"]
-              .measurementId,
+            name: coreEnv.analytics[App.WEB]["google-analytics"].measurementId,
             message: "Enter your Google Analytics measurement ID",
             initial:
               configuredEnv[
-                config.env.analytics[App.WEB]["google-analytics"].measurementId
+                coreEnv.analytics[App.WEB]["google-analytics"].measurementId
               ],
           },
           {
             type: "text",
-            name: config.env.analytics[App.WEB]["google-analytics"].secret,
+            name: coreEnv.analytics[App.WEB]["google-analytics"].secret,
             message: "Enter your Google Analytics secret",
             initial:
               configuredEnv[
-                config.env.analytics[App.WEB]["google-analytics"].secret
+                coreEnv.analytics[App.WEB]["google-analytics"].secret
               ],
           },
         ],
@@ -59,10 +59,9 @@ const getAnalyticsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.WEB].mixpanel.token,
+            name: coreEnv.analytics[App.WEB].mixpanel.token,
             message: "Enter your Mixpanel token",
-            initial:
-              configuredEnv[config.env.analytics[App.WEB].mixpanel.token],
+            initial: configuredEnv[coreEnv.analytics[App.WEB].mixpanel.token],
           },
         ],
         { onCancel },
@@ -72,19 +71,17 @@ const getAnalyticsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.WEB]["open-panel"].clientId,
+            name: coreEnv.analytics[App.WEB]["open-panel"].clientId,
             message: "Enter your OpenPanel client ID",
             initial:
-              configuredEnv[
-                config.env.analytics[App.WEB]["open-panel"].clientId
-              ],
+              configuredEnv[coreEnv.analytics[App.WEB]["open-panel"].clientId],
           },
           {
             type: "text",
-            name: config.env.analytics[App.WEB]["open-panel"].secret,
+            name: coreEnv.analytics[App.WEB]["open-panel"].secret,
             message: "Enter your OpenPanel secret",
             initial:
-              configuredEnv[config.env.analytics[App.WEB]["open-panel"].secret],
+              configuredEnv[coreEnv.analytics[App.WEB]["open-panel"].secret],
           },
         ],
         { onCancel },
@@ -94,17 +91,16 @@ const getAnalyticsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.WEB].plausible.domain,
+            name: coreEnv.analytics[App.WEB].plausible.domain,
             message: "Enter your Plausible domain",
-            initial:
-              configuredEnv[config.env.analytics[App.WEB].plausible.domain],
+            initial: configuredEnv[coreEnv.analytics[App.WEB].plausible.domain],
           },
           {
             type: "text",
-            name: config.env.analytics[App.WEB].plausible.host,
+            name: coreEnv.analytics[App.WEB].plausible.host,
             message: "Enter your Plausible host",
             initial:
-              configuredEnv[config.env.analytics[App.WEB].plausible.host] ??
+              configuredEnv[coreEnv.analytics[App.WEB].plausible.host] ??
               "https://plausible.io",
           },
         ],
@@ -115,16 +111,16 @@ const getAnalyticsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.WEB].posthog.key,
+            name: coreEnv.analytics[App.WEB].posthog.key,
             message: "Enter your PostHog key",
-            initial: configuredEnv[config.env.analytics[App.WEB].posthog.key],
+            initial: configuredEnv[coreEnv.analytics[App.WEB].posthog.key],
           },
           {
             type: "text",
-            name: config.env.analytics[App.WEB].posthog.host,
+            name: coreEnv.analytics[App.WEB].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.analytics[App.WEB].posthog.host] ??
+              configuredEnv[coreEnv.analytics[App.WEB].posthog.host] ??
               "https://us.posthog.com",
           },
         ],
@@ -135,32 +131,31 @@ const getAnalyticsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.WEB].umami.host,
+            name: coreEnv.analytics[App.WEB].umami.host,
             message: "Enter your Umami host",
             initial:
-              configuredEnv[config.env.analytics[App.WEB].umami.host] ??
+              configuredEnv[coreEnv.analytics[App.WEB].umami.host] ??
               "https://cloud.umami.is",
           },
           {
             type: "text",
-            name: config.env.analytics[App.WEB].umami.websiteId,
+            name: coreEnv.analytics[App.WEB].umami.websiteId,
             message: "Enter your Umami website ID",
-            initial:
-              configuredEnv[config.env.analytics[App.WEB].umami.websiteId],
+            initial: configuredEnv[coreEnv.analytics[App.WEB].umami.websiteId],
           },
           {
             type: "text",
-            name: config.env.analytics[App.WEB].umami.apiHost,
+            name: coreEnv.analytics[App.WEB].umami.apiHost,
             message: "Enter your Umami API host",
             initial:
-              configuredEnv[config.env.analytics[App.WEB].umami.apiHost] ??
+              configuredEnv[coreEnv.analytics[App.WEB].umami.apiHost] ??
               "https://api-gateway.umami.dev",
           },
           {
             type: "text",
-            name: config.env.analytics[App.WEB].umami.apiKey,
+            name: coreEnv.analytics[App.WEB].umami.apiKey,
             message: "Enter your Umami API key",
-            initial: configuredEnv[config.env.analytics[App.WEB].umami.apiKey],
+            initial: configuredEnv[coreEnv.analytics[App.WEB].umami.apiKey],
           },
         ],
         { onCancel },
@@ -170,10 +165,9 @@ const getAnalyticsWebProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.analytics[App.WEB].vemetric.token,
+            name: coreEnv.analytics[App.WEB].vemetric.token,
             message: "Enter your Vemetric project token",
-            initial:
-              configuredEnv[config.env.analytics[App.WEB].vemetric.token],
+            initial: configuredEnv[coreEnv.analytics[App.WEB].vemetric.token],
           },
         ],
         { onCancel },

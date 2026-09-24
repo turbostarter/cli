@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { FlagsProvider, App, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
+
+import { FlagsProvider, App, coreEnv } from "../definitions";
 
 const getFlagsMobileProvider = async (): Promise<{
   provider: FlagsProvider[typeof App.MOBILE];
@@ -36,16 +37,16 @@ const getFlagsMobileProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.flags[App.MOBILE].posthog.key,
+            name: coreEnv.flags[App.MOBILE].posthog.key,
             message: "Enter your PostHog key",
-            initial: configuredEnv[config.env.flags[App.MOBILE].posthog.key],
+            initial: configuredEnv[coreEnv.flags[App.MOBILE].posthog.key],
           },
           {
             type: "text",
-            name: config.env.flags[App.MOBILE].posthog.host,
+            name: coreEnv.flags[App.MOBILE].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.flags[App.MOBILE].posthog.host] ??
+              configuredEnv[coreEnv.flags[App.MOBILE].posthog.host] ??
               "https://us.i.posthog.com",
           },
         ],
@@ -56,17 +57,17 @@ const getFlagsMobileProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.flags[App.MOBILE].growthbook.clientKey,
+            name: coreEnv.flags[App.MOBILE].growthbook.clientKey,
             message: "Enter your GrowthBook client key",
             initial:
-              configuredEnv[config.env.flags[App.MOBILE].growthbook.clientKey],
+              configuredEnv[coreEnv.flags[App.MOBILE].growthbook.clientKey],
           },
           {
             type: "text",
-            name: config.env.flags[App.MOBILE].growthbook.apiHost,
+            name: coreEnv.flags[App.MOBILE].growthbook.apiHost,
             message: "Enter your GrowthBook API host",
             initial:
-              configuredEnv[config.env.flags[App.MOBILE].growthbook.apiHost] ??
+              configuredEnv[coreEnv.flags[App.MOBILE].growthbook.apiHost] ??
               "https://cdn.growthbook.io",
           },
         ],

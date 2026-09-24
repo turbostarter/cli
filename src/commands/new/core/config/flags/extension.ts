@@ -1,7 +1,8 @@
 import prompts from "prompts";
 
-import { FlagsProvider, App, config } from "~/config";
 import { getLabel, onCancel } from "~/utils";
+
+import { FlagsProvider, App, coreEnv } from "../definitions";
 
 const getFlagsExtensionProvider = async (): Promise<{
   provider: FlagsProvider[typeof App.EXTENSION];
@@ -38,16 +39,16 @@ const getFlagsExtensionProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.flags[App.EXTENSION].posthog.key,
+            name: coreEnv.flags[App.EXTENSION].posthog.key,
             message: "Enter your PostHog key",
-            initial: configuredEnv[config.env.flags[App.EXTENSION].posthog.key],
+            initial: configuredEnv[coreEnv.flags[App.EXTENSION].posthog.key],
           },
           {
             type: "text",
-            name: config.env.flags[App.EXTENSION].posthog.host,
+            name: coreEnv.flags[App.EXTENSION].posthog.host,
             message: "Enter your PostHog host",
             initial:
-              configuredEnv[config.env.flags[App.EXTENSION].posthog.host] ??
+              configuredEnv[coreEnv.flags[App.EXTENSION].posthog.host] ??
               "https://us.i.posthog.com",
           },
         ],
@@ -58,21 +59,18 @@ const getFlagsExtensionProviderConfig = async (
         [
           {
             type: "text",
-            name: config.env.flags[App.EXTENSION].growthbook.clientKey,
+            name: coreEnv.flags[App.EXTENSION].growthbook.clientKey,
             message: "Enter your GrowthBook client key",
             initial:
-              configuredEnv[
-                config.env.flags[App.EXTENSION].growthbook.clientKey
-              ],
+              configuredEnv[coreEnv.flags[App.EXTENSION].growthbook.clientKey],
           },
           {
             type: "text",
-            name: config.env.flags[App.EXTENSION].growthbook.apiHost,
+            name: coreEnv.flags[App.EXTENSION].growthbook.apiHost,
             message: "Enter your GrowthBook API host",
             initial:
-              configuredEnv[
-                config.env.flags[App.EXTENSION].growthbook.apiHost
-              ] ?? "https://cdn.growthbook.io",
+              configuredEnv[coreEnv.flags[App.EXTENSION].growthbook.apiHost] ??
+              "https://cdn.growthbook.io",
           },
         ],
         { onCancel },

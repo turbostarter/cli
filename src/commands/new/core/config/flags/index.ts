@@ -1,10 +1,10 @@
-import { App } from "~/config";
+import { App } from "../definitions";
 
 import { getFlagsExtensionConfig } from "./extension";
 import { getFlagsMobileConfig } from "./mobile";
 import { getFlagsWebConfig } from "./web";
 
-import type { FlagsProvider } from "~/config";
+import type { FlagsProvider } from "../definitions";
 
 export const getFlagsConfig = async (
   apps: App[],
