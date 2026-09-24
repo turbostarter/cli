@@ -57,7 +57,7 @@ npx @turbostarter/cli@latest new
 Options:
 
 - `-c, --cwd <cwd>`: Working directory where the new project folder is created (defaults to current directory).
-- `--kit <core|ai|edge>`: Select a kit without the first prompt.
+- `-k, --kit <core|ai|edge>`: Select a kit without the first prompt.
 
 What it does:
 

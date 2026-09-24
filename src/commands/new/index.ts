@@ -61,7 +61,7 @@ export const newCommand = new Command()
     "the working directory. Defaults to the current directory.",
     process.cwd(),
   )
-  .option("--kit <kit>", "skip kit selection (core, ai, edge)")
+  .option("-k, --kit <kit>", "skip kit selection (core, ai, edge)")
   .action(async (opts: z.infer<typeof newOptionsSchema>) => {
     try {
       logger.log(`\n${color.bgRedBright(color.white(" TurboStarter "))}\n`);
