@@ -1,9 +1,12 @@
 import { promises } from "fs";
 import _ from "lodash";
 import { join } from "path";
+import { Project } from "ts-morph";
+
+import { enforceSchema } from "~/utils";
 
 import type { SourceFile } from "ts-morph";
-import type * as z from "zod/v4/core";
+import type { z } from "zod";
 
 type BivariantCallback<TInput, TOutput> = {
   bivarianceHack(input: TInput): TOutput;
@@ -21,7 +24,7 @@ type GeneralFile = {
     }
 );
 
-type JsonFile<Schema extends z.$ZodType, Data = z.infer<Schema>> = {
+type JsonFile<Schema extends z.ZodType, Data = z.infer<Schema>> = {
   path: `${string}.json`;
 } & (
   | {
@@ -52,10 +55,10 @@ type Directory = {
   action: "remove";
 };
 
-export type File = GeneralFile | TypescriptFile | JsonFile<z.$ZodType, unknown>;
+export type File = GeneralFile | TypescriptFile | JsonFile<z.ZodType, unknown>;
 export type Entry = File | Directory;
 
-export function file<S extends z.$ZodType>(file: JsonFile<S>): JsonFile<S>;
+export function file<S extends z.ZodType>(file: JsonFile<S>): JsonFile<S>;
 export function file<T extends TypescriptFile>(file: T): T;
 export function file<F extends GeneralFile>(file: F): F;
 export function file(file: File) {
@@ -64,9 +67,8 @@ export function file(file: File) {
 
 export const directory = <D extends Directory>(directory: D) => directory;
 
-export const isJsonFile = (
-  file: Entry,
-): file is JsonFile<z.$ZodType, unknown> => file.path.endsWith(".json");
+export const isJsonFile = (file: Entry): file is JsonFile<z.ZodType, unknown> =>
+  file.path.endsWith(".json");
 
 export const isTypescriptFile = (file: Entry): file is TypescriptFile =>
   [".ts", ".tsx"].some((extension) => file.path.endsWith(extension));
@@ -85,6 +87,30 @@ export const removePath = async ({
 }) => {
   const fullPath = join(cwd, path);
   await promises.rm(fullPath, { recursive: true, force: true });
+};
+
+export const applyFileModifications = async (cwd: string, files: Entry[]) => {
+  const project = new Project({ skipAddingFilesFromTsConfig: true });
+
+  for (const file of files) {
+    if (file.action === "remove") {
+      await removePath({ cwd, path: file.path });
+    } else if (isJsonFile(file)) {
+      const path = join(cwd, file.path);
+      const parsed: unknown = JSON.parse(await promises.readFile(path, "utf8"));
+      if (!enforceSchema(parsed, file.schema)) continue;
+      await promises.writeFile(
+        path,
+        JSON.stringify(file.modify(parsed), null, 2),
+      );
+    } else if (isTypescriptFile(file)) {
+      const source = project.addSourceFileAtPath(join(cwd, file.path));
+      file.modify(source);
+      await source.save();
+    } else if (isTextFile(file)) {
+      await modifyTextFile({ cwd, path: file.path, modify: file.modify });
+    }
+  }
 };
 
 export const removeDependency = <T extends Record<string, unknown>>(
@@ -122,6 +148,20 @@ export const removePatchedDependency = (
   return withoutEntry.replace(/\n*patchedDependencies:\n(?! {2}\S)/, "\n");
 };
 
+export const modifyTextFile = async ({
+  cwd,
+  path,
+  modify,
+}: {
+  cwd: string;
+  path: string;
+  modify: (content: string) => string;
+}) => {
+  const fullPath = join(cwd, path);
+  const content = await promises.readFile(fullPath, "utf8");
+  await promises.writeFile(fullPath, modify(content));
+};
+
 export const replaceInFile = async ({
   cwd,
   path,
@@ -133,10 +173,11 @@ export const replaceInFile = async ({
   pattern: RegExp | string;
   value: string;
 }) => {
-  const fullPath = join(cwd, path);
-  const content = await promises.readFile(fullPath, "utf8");
-  const newContent = content.replace(pattern, value);
-  await promises.writeFile(fullPath, newContent);
+  await modifyTextFile({
+    cwd,
+    path,
+    modify: (content) => content.replace(pattern, value),
+  });
 };
 
 export const replaceInFiles = async ({

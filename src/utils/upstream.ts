@@ -12,7 +12,14 @@ export async function hasSshAccess(): Promise<boolean> {
   try {
     await execa(
       "ssh",
-      ["-T", "git@github.com", "-o", "StrictHostKeyChecking=no"],
+      [
+        "-T",
+        "git@github.com",
+        "-o",
+        "StrictHostKeyChecking=no",
+        "-o",
+        "BatchMode=yes",
+      ],
       {
         timeout: 10_000,
       },
@@ -41,6 +48,7 @@ export async function hasRepoAccess(
 
     await execa("git", ["ls-remote", "--exit-code", url, "HEAD"], {
       timeout: options?.timeout ?? 8_000,
+      env: { GIT_TERMINAL_PROMPT: "0" },
     });
 
     return true;
@@ -57,7 +65,11 @@ export function isUpstreamUrlValid(url: string, repo: string): boolean {
 
 export async function getUpstreamRemoteUrl({ cwd }: { cwd: string }) {
   try {
-    const { stdout } = await execa("git remote get-url upstream", { cwd });
+    const { stdout } = await execa(
+      "git",
+      ["config", "--get", "remote.upstream.url"],
+      { cwd },
+    );
     return stdout.trim() || undefined;
   } catch {
     return undefined;
@@ -76,7 +88,7 @@ export async function setUpstreamRemote(url: string, { cwd }: { cwd: string }) {
 
 export async function isGitClean({ cwd }: { cwd: string }): Promise<boolean> {
   try {
-    const { stdout } = await execa("git status --porcelain", { cwd });
+    const { stdout } = await execa("git", ["status", "--porcelain"], { cwd });
     return stdout.trim() === "";
   } catch {
     return false;

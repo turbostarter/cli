@@ -13,7 +13,9 @@ export const startServices = async (cwd: string, services: Service[]) => {
   const spinner = ora(`Starting local services...`).start();
 
   try {
-    await execa("pnpm", ["services:start", "--", ...services], { cwd });
+    await execa("pnpm", ["services:start", ...services], {
+      cwd,
+    });
     await execa(
       "pnpm",
       [
@@ -21,9 +23,7 @@ export const startServices = async (cwd: string, services: Service[]) => {
         "pnpm",
         "turbo",
         "setup",
-        services
-          .map((service) => `--filter=${servicesPackages[service]}`)
-          .join(" "),
+        ...services.map((service) => `--filter=${servicesPackages[service]}`),
       ],
       { cwd },
     );

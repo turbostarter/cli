@@ -4,9 +4,9 @@ import { promises } from "fs";
 import ora from "ora";
 import path from "path";
 import color from "picocolors";
-import { z } from "zod";
+import * as z from "zod";
 
-import { config } from "~/config";
+import { config, Kit } from "~/config";
 import {
   getUpstreamRemoteUrl,
   hasSshAccess,
@@ -28,6 +28,7 @@ type ProjectUpdateResult =
   | {
       success: true;
       alreadyUpToDate: boolean;
+      repository: string;
     }
   | {
       success: false;
@@ -63,7 +64,7 @@ export const projectUpdateCommand = new Command()
           spinner.succeed("Already up to date.");
         } else {
           spinner.succeed(
-            `Successfully pulled latest changes from ${color.cyan(config.products.core.repository)}.`,
+            `Successfully pulled latest changes from ${color.cyan(result.repository)}.`,
           );
         }
         await logAddOnUpsell("update");
@@ -107,6 +108,8 @@ const updateProject = async ({
     };
   }
 
+  const repository = config.products[projectValidation.kit].repository;
+
   const gitClean = await isGitClean({ cwd });
 
   if (!gitClean) {
@@ -121,18 +124,12 @@ const updateProject = async ({
 
   if (!currentUpstreamUrl) {
     const useSsh = await hasSshAccess();
-    const url = useSsh
-      ? sshUrl(config.products.core.repository)
-      : httpsUrl(config.products.core.repository);
+    const url = useSsh ? sshUrl(repository) : httpsUrl(repository);
     await setUpstreamRemote(url, { cwd });
     currentUpstreamUrl = url;
-  } else if (
-    !isUpstreamUrlValid(currentUpstreamUrl, config.products.core.repository)
-  ) {
+  } else if (!isUpstreamUrlValid(currentUpstreamUrl, repository)) {
     const useSsh = currentUpstreamUrl.startsWith("git@");
-    const expectedUrl = useSsh
-      ? sshUrl(config.products.core.repository)
-      : httpsUrl(config.products.core.repository);
+    const expectedUrl = useSsh ? sshUrl(repository) : httpsUrl(repository);
 
     return {
       success: false,
@@ -156,6 +153,7 @@ const updateProject = async ({
     return {
       success: true,
       alreadyUpToDate: stdout.includes("Already up to date"),
+      repository,
     };
   } catch (error) {
     const output = getErrorOutput(error);
@@ -192,8 +190,24 @@ const updateProject = async ({
 
 const isWithinTurboStarterProject = async (
   cwd: string,
-): Promise<{ valid: true } | { valid: false; reason: string }> => {
+): Promise<{ valid: true; kit: Kit } | { valid: false; reason: string }> => {
   const normalizedCwd = path.resolve(cwd);
+  const exists = async (marker: string) => {
+    try {
+      await promises.access(path.join(normalizedCwd, marker));
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const isEdge = (
+    await Promise.all(
+      ["package.json", "wrangler.jsonc", "src/server.ts"].map(exists),
+    )
+  ).every(Boolean);
+  if (isEdge) return { valid: true, kit: Kit.EDGE };
+
   const requiredMarkers = [
     "package.json",
     "pnpm-workspace.yaml",
@@ -204,14 +218,9 @@ const isWithinTurboStarterProject = async (
 
   const missingMarkers = (
     await Promise.all(
-      requiredMarkers.map(async (marker) => {
-        try {
-          await promises.access(path.join(normalizedCwd, marker));
-          return undefined;
-        } catch {
-          return marker;
-        }
-      }),
+      requiredMarkers.map(async (marker) =>
+        (await exists(marker)) ? undefined : marker,
+      ),
     )
   ).filter(Boolean);
 
@@ -224,5 +233,14 @@ const isWithinTurboStarterProject = async (
     };
   }
 
-  return { valid: true };
+  const isAi = await exists("packages/ai/chat/package.json");
+  const isCore = await exists("packages/billing/web/package.json");
+  if (isAi === isCore) {
+    return {
+      valid: false,
+      reason: "Could not determine whether this is a Core or AI project.",
+    };
+  }
+
+  return { valid: true, kit: isAi ? Kit.AI : Kit.CORE };
 };

@@ -48,25 +48,23 @@ Running `turbostarter --help` shows the full command list.
 
 ### Creating new project
 
-Create a new TurboStarter project:
+Create a new TurboStarter project. The first prompt asks which kit to use:
 
 ```bash
-npx turbostarter@latest new
+npx @turbostarter/cli@latest new
 ```
 
 Options:
 
 - `-c, --cwd <cwd>`: Working directory where the new project folder is created (defaults to current directory).
+- `-k, --kit <core|ai|edge>`: Select a kit without the first prompt.
 
 What it does:
 
-- Prompts for project name and app targets (web, mobile, extension).
-- Optionally walks through provider configuration (db, billing, email, storage, analytics, monitoring, feature flags).
-- Clones the TurboStarter template repository.
-- Configures git remotes.
-- Applies app-specific file modifications.
-- Installs dependencies and formats files.
-- Starts required local services when needed.
+- **Core Kit:** Choose web, mobile, or extension apps and optionally configure its providers. Web is required.
+- **AI Kit:** Choose web with optional mobile, then optionally configure the database, AI providers, tools, voice, and storage. Local Postgres is started and migrated when selected.
+- **Edge Kit:** Create the single Cloudflare app with all its existing Wrangler bindings and a local D1 database. The CLI sets the project name and local environment values in `wrangler.jsonc`, and replaces template production resource IDs. Because AI and Flagship remain remote bindings, `pnpm dev` needs Cloudflare credentials and your own Flagship app ID.
+- For every kit, the CLI clones its repository, prepares local environment files, installs dependencies, and points `upstream` at the selected kit.
 
 ### Managing existing project
 
@@ -77,7 +75,7 @@ Set of commands for managing your existing TurboStarter project.
 Update an existing TurboStarter project with the latest upstream changes:
 
 ```bash
-npx turbostarter@latest project update
+npx @turbostarter/cli@latest project update
 ```
 
 Options:
@@ -88,7 +86,7 @@ What it does:
 
 - Validates the target folder is a TurboStarter project root.
 - Verifies the git working tree is clean before updating.
-- Ensures `upstream` remote points to `turbostarter/core` (SSH or HTTPS).
+- Detects the kit and ensures `upstream` points to its corresponding repository (SSH or HTTPS).
 - Fetches upstream and merges `upstream/main` into the current branch.
 - Prints conflicting files with next steps if merge conflicts occur.
 
