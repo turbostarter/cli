@@ -5,6 +5,7 @@ import { join } from "node:path";
 import ora from "ora";
 import color from "picocolors";
 
+import { Kit } from "~/config";
 import { logger } from "~/utils";
 
 import {
@@ -161,7 +162,7 @@ export const initializeEdgeProject = async (project: NewProject) => {
     `\nCreating a new Edge Kit project in ${color.greenBright(join(project.cwd, project.name))}.\n`,
   );
 
-  const projectDir = await cloneKit(project, "edge");
+  const projectDir = await cloneKit(project, Kit.EDGE);
   await copyEnvExamples(projectDir, ["."]);
   await setEnvValue(projectDir, ".", "VITE_PRODUCT_NAME", project.projectName);
   await setEnvValue(projectDir, ".", "BETTER_AUTH_SECRET", createAuthSecret());

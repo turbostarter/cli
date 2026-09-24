@@ -1,6 +1,6 @@
 import color from "picocolors";
 
-import { config } from "~/config";
+import { config, Kit } from "~/config";
 import { logger } from "~/utils/logger";
 import { hasRepoAccess, hasSshAccess } from "~/utils/upstream";
 
@@ -15,12 +15,12 @@ export const logAddOnUpsell = async (campaign: "new_success" | "update") => {
   try {
     const useSsh = await hasSshAccess();
     const [hasAi, hasOpenClaw] = await Promise.all([
-      hasRepoAccess(config.products.ai.repository, { useSsh }),
+      hasRepoAccess(config.products[Kit.AI].repository, { useSsh }),
       hasRepoAccess(config.products.openclaw.repository, { useSsh }),
     ]);
 
     if (hasAi) {
-      const url = withUtm(config.products.ai.url, campaign);
+      const url = withUtm(config.products[Kit.AI].url, campaign);
       logger.info(
         `\nWant AI templates too? Check out AI Kit - ${color.underline(url)}`,
       );

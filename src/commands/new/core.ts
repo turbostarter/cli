@@ -14,7 +14,7 @@ import { fileModificationsByMissingApp } from "~/commands/new/config/file-modifi
 import { getFlagsConfig } from "~/commands/new/config/flags";
 import { getMonitoringConfig } from "~/commands/new/config/monitoring";
 import { getStorageConfig } from "~/commands/new/config/storage";
-import { App, providerConfigFiles, Service, ServiceType } from "~/config";
+import { App, Kit, providerConfigFiles, Service, ServiceType } from "~/config";
 import { enforceSchema, logger, onCancel } from "~/utils";
 import {
   isJsonFile,
@@ -61,7 +61,7 @@ export const initializeCoreProject = async ({
     `\nCreating a new TurboStarter project in ${color.greenBright(join(cwd, name))}. \n`,
   );
 
-  const projectDir = await cloneKit({ cwd, name, projectName }, "core");
+  const projectDir = await cloneKit({ cwd, name, projectName }, Kit.CORE);
   await modifyFilesForMissingApps(projectDir, apps);
   await copyEnvExamples(projectDir, [
     ".",

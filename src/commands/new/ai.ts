@@ -4,7 +4,7 @@ import color from "picocolors";
 import prompts from "prompts";
 
 import { getDatabaseConfig } from "~/commands/new/config/db";
-import { Service, ServiceType } from "~/config";
+import { Kit, Service, ServiceType } from "~/config";
 import { logger, onCancel } from "~/utils";
 
 import {
@@ -149,7 +149,7 @@ export const initializeAiProject = async (project: NewProject) => {
   logger.log(
     `\nCreating a new AI Kit project in ${color.greenBright(join(project.cwd, project.name))}.\n`,
   );
-  const projectDir = await cloneKit(project, "ai");
+  const projectDir = await cloneKit(project, Kit.AI);
   if (!mobile) await removeMobile(projectDir);
   await copyEnvExamples(projectDir, [
     ".",

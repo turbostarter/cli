@@ -6,7 +6,7 @@ import path from "path";
 import color from "picocolors";
 import { z } from "zod";
 
-import { config } from "~/config";
+import { config, Kit } from "~/config";
 import {
   getUpstreamRemoteUrl,
   hasSshAccess,
@@ -67,7 +67,7 @@ export const projectUpdateCommand = new Command()
             `Successfully pulled latest changes from ${color.cyan(result.repository)}.`,
           );
         }
-        if (result.repository === config.products.core.repository)
+        if (result.repository === config.products[Kit.CORE].repository)
           await logAddOnUpsell("update");
         return;
       }
@@ -191,10 +191,7 @@ const updateProject = async ({
 
 const isWithinTurboStarterProject = async (
   cwd: string,
-): Promise<
-  | { valid: true; kit: "core" | "ai" | "edge" }
-  | { valid: false; reason: string }
-> => {
+): Promise<{ valid: true; kit: Kit } | { valid: false; reason: string }> => {
   const normalizedCwd = path.resolve(cwd);
   const exists = async (marker: string) => {
     try {
@@ -210,7 +207,7 @@ const isWithinTurboStarterProject = async (
       ["package.json", "wrangler.jsonc", "src/server.ts"].map(exists),
     )
   ).every(Boolean);
-  if (isEdge) return { valid: true, kit: "edge" };
+  if (isEdge) return { valid: true, kit: Kit.EDGE };
 
   const requiredMarkers = [
     "package.json",
@@ -246,5 +243,5 @@ const isWithinTurboStarterProject = async (
     };
   }
 
-  return { valid: true, kit: isAi ? "ai" : "core" };
+  return { valid: true, kit: isAi ? Kit.AI : Kit.CORE };
 };

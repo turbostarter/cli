@@ -42,6 +42,12 @@ export const App = {
   EXTENSION: "extension",
 } as const;
 
+export const Kit = {
+  CORE: "core",
+  AI: "ai",
+  EDGE: "edge",
+} as const;
+
 export const BillingProvider = {
   [App.WEB]: {
     STRIPE: "stripe",
@@ -118,6 +124,7 @@ export type EmailProvider = (typeof EmailProvider)[keyof typeof EmailProvider];
 export type EnvPath = (typeof EnvPath)[keyof typeof EnvPath];
 export type EnvFile = (typeof EnvFile)[keyof typeof EnvFile];
 export type App = (typeof App)[keyof typeof App];
+export type Kit = (typeof Kit)[keyof typeof Kit];
 
 export type BillingProvider = {
   [
@@ -533,15 +540,15 @@ export const servicesPackages: Record<Service, string> = {
 };
 
 export const products = {
-  core: {
+  [Kit.CORE]: {
     repository: "turbostarter/core",
     url: "https://www.turbostarter.dev",
   },
-  ai: {
+  [Kit.AI]: {
     repository: "turbostarter/ai",
     url: "https://www.turbostarter.dev/ai",
   },
-  edge: {
+  [Kit.EDGE]: {
     repository: "turbostarter/edge",
     url: "https://www.turbostarter.dev/edge",
   },

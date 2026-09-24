@@ -4,6 +4,7 @@ import color from "picocolors";
 import prompts from "prompts";
 import { z } from "zod";
 
+import { Kit } from "~/config";
 import { logAddOnUpsell, logger, onCancel, slugify } from "~/utils";
 
 import { initializeAiProject } from "./ai";
@@ -12,11 +13,13 @@ import { initializeCoreProject } from "./core";
 import { initializeEdgeProject } from "./edge";
 import { validatePrerequisites } from "./prerequisites";
 
-import type { Kit, NewProject } from "./common";
+import type { NewProject } from "./common";
+
+const kitSchema = z.enum(Kit);
 
 const newOptionsSchema = z.object({
   cwd: z.string(),
-  kit: z.enum(["core", "ai", "edge"]).optional(),
+  kit: kitSchema.optional(),
 });
 
 const selectKit = async (): Promise<Kit> => {
@@ -32,7 +35,7 @@ const selectKit = async (): Promise<Kit> => {
     },
     { onCancel },
   );
-  return z.enum(["core", "ai", "edge"]).parse(result.kit);
+  return kitSchema.parse(result.kit);
 };
 
 const getProjectName = async (): Promise<string> => {
@@ -61,7 +64,10 @@ export const newCommand = new Command()
     "the working directory. Defaults to the current directory.",
     process.cwd(),
   )
-  .option("-k, --kit <kit>", "skip kit selection (core, ai, edge)")
+  .option(
+    "-k, --kit <kit>",
+    `skip kit selection (${Object.values(Kit).join(", ")})`,
+  )
   .action(async (opts: z.infer<typeof newOptionsSchema>) => {
     try {
       logger.log(`\n${color.bgRedBright(color.white(" TurboStarter "))}\n`);
@@ -76,22 +82,22 @@ export const newCommand = new Command()
         projectName,
       };
 
-      if (kit === "core") await initializeCoreProject(project);
-      if (kit === "ai") await initializeAiProject(project);
-      if (kit === "edge") await initializeEdgeProject(project);
+      if (kit === Kit.CORE) await initializeCoreProject(project);
+      if (kit === Kit.AI) await initializeAiProject(project);
+      if (kit === Kit.EDGE) await initializeEdgeProject(project);
 
       logger.log(
         `\n🎉 ${kits[kit].label} is ready in ${color.greenBright(join(project.cwd, project.name))}!\n`,
       );
       logger.log(`> cd ${project.name}\n> pnpm dev\n`);
-      if (kit === "ai")
+      if (kit === Kit.AI)
         logger.info("AI features need the provider keys you choose to use.");
-      if (kit === "edge")
+      if (kit === Kit.EDGE)
         logger.info(
           "Edge keeps all service bindings. pnpm dev needs Cloudflare credentials and your own Flagship app ID because AI and Flagship use remote bindings.",
         );
       logger.info(`Problems? ${color.underline(kits[kit].docs)}`);
-      if (kit === "core") await logAddOnUpsell("new_success");
+      if (kit === Kit.CORE) await logAddOnUpsell("new_success");
     } catch (error) {
       logger.error(error);
       process.exitCode = 1;

@@ -6,7 +6,7 @@ import ora from "ora";
 import color from "picocolors";
 import prompts from "prompts";
 
-import { config } from "~/config";
+import { config, Kit } from "~/config";
 import {
   hasSshAccess,
   httpsUrl,
@@ -16,8 +16,6 @@ import {
   sshUrl,
 } from "~/utils";
 
-export type Kit = "core" | "ai" | "edge";
-
 export interface NewProject {
   cwd: string;
   name: string;
@@ -25,19 +23,19 @@ export interface NewProject {
 }
 
 export const kits = {
-  core: {
+  [Kit.CORE]: {
     label: "Core Kit",
-    ...config.products.core,
+    ...config.products[Kit.CORE],
     docs: "https://turbostarter.dev/docs",
   },
-  ai: {
+  [Kit.AI]: {
     label: "AI Kit",
-    ...config.products.ai,
+    ...config.products[Kit.AI],
     docs: "https://www.turbostarter.dev/ai/docs",
   },
-  edge: {
+  [Kit.EDGE]: {
     label: "Edge Kit",
-    ...config.products.edge,
+    ...config.products[Kit.EDGE],
     docs: "https://www.turbostarter.dev/edge/docs",
   },
 } as const;
