@@ -18,9 +18,17 @@ import type { NewProject } from "./common";
 const kitSchema = z.enum(Kit);
 
 const newOptionsSchema = z.object({
-  cwd: z.string(),
+  cwd: z.string().min(1),
   kit: kitSchema.optional(),
 });
+
+const projectNameSchema = z
+  .string()
+  .refine((name) => name.trim().length > 0, "Name is required!")
+  .refine(
+    (name) => slugify(name).length > 0,
+    "Name must contain at least one letter or number.",
+  );
 
 const selectKit = async (): Promise<Kit> => {
   const result = await prompts(
@@ -45,15 +53,13 @@ const getProjectName = async (): Promise<string> => {
       name: "name",
       message: "Enter your project name.",
       validate: (value: string) => {
-        if (!value.trim()) return "Name is required!";
-        if (!slugify(value))
-          return "Name must contain at least one letter or number.";
-        return true;
+        const parsed = projectNameSchema.safeParse(value);
+        return parsed.success || parsed.error.issues[0].message;
       },
     },
     { onCancel },
   );
-  return String(result.name);
+  return projectNameSchema.parse(result.name);
 };
 
 export const newCommand = new Command()

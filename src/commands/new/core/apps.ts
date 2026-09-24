@@ -1,11 +1,19 @@
 import color from "picocolors";
 import prompts from "prompts";
+import { z } from "zod";
 
 import { logger, onCancel } from "~/utils";
 import { applyFileModifications } from "~/utils/file";
 
 import { App } from "./config/definitions";
 import { fileModificationsByMissingApp } from "./config/file-modifications";
+
+const appsSchema = z
+  .array(z.enum(App))
+  .refine(
+    (apps) => apps.includes(App.WEB),
+    "You must ship a web app, to ensure backend services work.",
+  );
 
 export const getApps = async () => {
   while (true) {
@@ -31,15 +39,9 @@ export const getApps = async () => {
       },
     );
 
-    const apps = result.apps as App[];
-
-    if (apps.includes(App.WEB)) {
-      return apps;
-    } else {
-      logger.error(
-        `You ${color.bold("must")} ship a web app, to ensure backend services work.`,
-      );
-    }
+    const parsed = appsSchema.safeParse(result.apps);
+    if (parsed.success) return parsed.data;
+    logger.error(parsed.error.issues[0].message);
   }
 };
 

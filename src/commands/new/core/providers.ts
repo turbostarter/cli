@@ -1,5 +1,6 @@
 import color from "picocolors";
 
+import { ServiceType } from "~/config";
 import { logger } from "~/utils";
 
 import { getDatabaseConfig } from "../database";
@@ -21,7 +22,8 @@ export const getProvidersConfig = async (apps: App[]) => {
   const configuredEnv: Record<string, string> = {};
 
   const db = await getDatabaseConfig(configuredEnv);
-  Object.assign(configuredEnv, "env" in db ? db.env : {});
+  const databaseEnv = db.type === ServiceType.CLOUD ? db.env : {};
+  Object.assign(configuredEnv, databaseEnv);
 
   const email = await getEmailConfig(configuredEnv);
   Object.assign(configuredEnv, email.env);
@@ -42,7 +44,7 @@ export const getProvidersConfig = async (apps: App[]) => {
   Object.assign(configuredEnv, flags.env);
 
   const env = {
-    ...("env" in db ? db.env : {}),
+    ...databaseEnv,
     ...billing.env,
     ...email.env,
     ...storage.env,

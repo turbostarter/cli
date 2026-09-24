@@ -21,7 +21,7 @@ export const chooseMobile = async () => {
     },
     { onCancel },
   );
-  return Boolean(result.mobile);
+  return z.object({ mobile: z.boolean() }).parse(result).mobile;
 };
 
 export const removeMobile = async (cwd: string) => {

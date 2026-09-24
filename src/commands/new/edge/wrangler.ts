@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
+import { z } from "zod";
 
 import { modifyTextFile } from "~/utils/file";
 
@@ -14,20 +15,28 @@ const wranglerVarKeys = new Set([
   "VITE_CF_WEB_ANALYTICS_TOKEN",
 ]);
 
-interface EdgeWrangler {
-  name: string;
-  vars: Record<string, string | boolean>;
-  routes: { pattern: string; custom_domain: boolean }[];
-  send_email: { allowed_sender_addresses: string[] }[];
-  d1_databases: { database_name: string; database_id: string }[];
-  kv_namespaces: { id: string }[];
-  r2_buckets: { bucket_name: string }[];
-  flagship: { app_id: string }[];
-  queues: {
-    producers: { queue: string }[];
-    consumers: { queue: string }[];
-  };
-}
+const wranglerSchema = z.looseObject({
+  name: z.string(),
+  vars: z.record(z.string(), z.union([z.string(), z.boolean()])),
+  routes: z.array(z.unknown()),
+  send_email: z
+    .array(z.looseObject({ allowed_sender_addresses: z.array(z.string()) }))
+    .min(1),
+  d1_databases: z
+    .array(
+      z.looseObject({ database_name: z.string(), database_id: z.string() }),
+    )
+    .min(1),
+  kv_namespaces: z.array(z.looseObject({ id: z.string() })).min(1),
+  r2_buckets: z.array(z.looseObject({ bucket_name: z.string() })).min(1),
+  flagship: z.array(z.looseObject({ app_id: z.string() })).min(1),
+  queues: z.looseObject({
+    producers: z.array(z.looseObject({ queue: z.string() })).min(1),
+    consumers: z.array(z.looseObject({ queue: z.string() })).min(1),
+  }),
+});
+
+type EdgeWrangler = z.infer<typeof wranglerSchema>;
 
 const setWranglerVars = (
   config: EdgeWrangler,
@@ -73,9 +82,9 @@ export const configureWrangler = async (
     cwd,
     path: "wrangler.jsonc",
     modify: (source) => {
-      const config = JSON.parse(
-        source.replace(/,(\s*[}\]])/g, "$1"),
-      ) as EdgeWrangler;
+      const config = wranglerSchema.parse(
+        JSON.parse(source.replace(/,(\s*[}\]])/g, "$1")),
+      );
       config.name = project.name;
       setWranglerVars(config, values);
       setWranglerBindings(config, project, values.EMAIL_FROM);

@@ -33,18 +33,8 @@ export const initializeAiProject = async (project: NewProject) => {
   if (!mobile) await removeMobile(projectDir);
 
   const databaseUrl =
-    "env" in db &&
-    db.env &&
-    typeof db.env === "object" &&
-    "DATABASE_URL" in db.env
-      ? db.env.DATABASE_URL
-      : undefined;
-  await prepareAiEnvironment(
-    project,
-    projectDir,
-    mobile,
-    typeof databaseUrl === "string" ? databaseUrl : undefined,
-  );
+    db.type === ServiceType.CLOUD ? db.env.DATABASE_URL : undefined;
+  await prepareAiEnvironment(project, projectDir, mobile, databaseUrl);
   if (configure) await configureAiProviders(projectDir);
 
   await installKitDependencies(projectDir);

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import ora from "ora";
 import color from "picocolors";
 import prompts from "prompts";
+import { z } from "zod";
 
 import { config, Kit } from "~/config";
 import {
@@ -40,6 +41,12 @@ export const kits = {
   },
 } as const;
 
+const configureSchema = z.object({ configure: z.boolean() });
+const optionalBooleanSchema = z.union([
+  z.literal(""),
+  z.enum(["true", "false"]),
+]);
+
 export const getConfigureProvidersStep = async (): Promise<boolean> => {
   const result = await prompts(
     {
@@ -53,7 +60,7 @@ export const getConfigureProvidersStep = async (): Promise<boolean> => {
     },
     { onCancel },
   );
-  return Boolean(result.configure);
+  return configureSchema.parse(result).configure;
 };
 
 export const cloneKit = async (project: NewProject, kit: Kit) => {
@@ -170,7 +177,7 @@ export const configureEnvGroups = async (
       },
       { onCancel },
     );
-    if (!selected.configure) continue;
+    if (!configureSchema.parse(selected).configure) continue;
 
     for (const entry of group.entries) {
       const answer = await prompts(
@@ -179,13 +186,14 @@ export const configureEnvGroups = async (
           name: "value",
           message: entry.label,
           validate: (value: string) =>
-            !entry.boolean || !value || value === "true" || value === "false"
+            !entry.boolean ||
+            optionalBooleanSchema.safeParse(value.trim()).success
               ? true
               : "Enter true or false.",
         },
         { onCancel },
       );
-      const value = String(answer.value ?? "").trim();
+      const value = z.string().trim().default("").parse(answer.value);
       if (value) {
         await setEnvValue(cwd, path, entry.key, value);
         configured[entry.key] = value;
