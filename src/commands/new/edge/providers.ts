@@ -90,8 +90,8 @@ export const configureProviders = async () => {
 
   return {
     env: {
-      CONTACT_EMAIL: "hello@example.com",
-      EMAIL_FROM: `noreply@example.com`,
+      [edgeEnv.contactEmail]: "hello@example.com",
+      [edgeEnv.emailFrom]: `noreply@example.com`,
       ...(await configureEnvGroups(groups)),
     },
   };

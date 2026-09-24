@@ -39,7 +39,9 @@ export const initializeEdgeProject = async (project: NewProject) => {
 
   await configureWrangler(project, projectDir, {
     [edgeEnv.productName]: project.projectName,
-    ...config?.env,
+    [edgeEnv.contactEmail]: "hello@example.com",
+    [edgeEnv.emailFrom]: `noreply@example.com`,
+    ...(config?.env ?? {}),
   });
   await installDependencies(projectDir);
   await prepareLocalD1(projectDir);

@@ -5,7 +5,7 @@ import prompts from "prompts";
 import * as z from "zod";
 
 import { config, Kit } from "~/config";
-import { logger, onCancel, slugify } from "~/utils";
+import { logger, logAddOnUpsell, onCancel, slugify } from "~/utils";
 
 import { initializeAiProject } from "./ai";
 import { initializeCoreProject } from "./core";
@@ -103,6 +103,7 @@ export const newCommand = new Command()
       );
       logger.log(`> cd ${project.name}\n> pnpm dev\n`);
       logger.info(`Problems? ${color.underline(config.products[kit].docs)}`);
+      await logAddOnUpsell("new_success");
     } catch (error) {
       logger.error(error);
       process.exit(1);
