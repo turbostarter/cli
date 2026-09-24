@@ -105,49 +105,75 @@ const wranglerVarKeys = new Set([
   "VITE_CF_WEB_ANALYTICS_TOKEN",
 ]);
 
-const syncWranglerVars = async (
+interface EdgeWrangler {
+  name: string;
+  vars?: Record<string, string | boolean>;
+  routes?: unknown;
+  flagship?: unknown;
+  ai?: unknown;
+  send_email?: { allowed_sender_addresses: string[] }[];
+  d1_databases?: { database_name: string; database_id: string }[];
+  kv_namespaces?: { id: string }[];
+  r2_buckets?: { bucket_name: string }[];
+  queues?: {
+    producers: { queue: string }[];
+    consumers: { queue: string }[];
+  };
+}
+
+const configureWrangler = async (
+  project: NewProject,
   cwd: string,
-  values: Record<string, string>,
+  values: Partial<Record<string, string>>,
 ) => {
-  for (const name of ["wrangler.local.jsonc", "wrangler.jsonc"]) {
-    const file = join(cwd, name);
-    let content = await promises.readFile(file, "utf8");
-    for (const [key, value] of Object.entries(values)) {
-      if (!wranglerVarKeys.has(key)) continue;
-      const encoded = ["VITE_AUTH_PASSWORD", "VITE_AUTH_ANONYMOUS"].includes(
-        key,
-      )
-        ? String(value === "true")
-        : JSON.stringify(value);
-      const pattern = new RegExp(`^([ \\t]*)"${key}":.*,$`, "m");
-      if (pattern.test(content)) {
-        content = content.replace(
-          pattern,
-          (_line, indent: string) => `${indent}"${key}": ${encoded},`,
-        );
-      } else {
-        content = content.replace(
-          '"vars": {\n',
-          `"vars": {\n    "${key}": ${encoded},\n`,
-        );
-      }
-    }
-    if (values.EMAIL_FROM) {
-      const address =
-        /<([^<>]+)>$/.exec(values.EMAIL_FROM)?.[1] ?? values.EMAIL_FROM;
-      const allowedSenders = /"allowed_sender_addresses": \[[^\]]*\]/;
-      if (!allowedSenders.test(content)) {
-        throw new Error(
-          `Edge template changed: ${name} has no email sender binding.`,
-        );
-      }
-      content = content.replace(
-        allowedSenders,
-        `"allowed_sender_addresses": [${JSON.stringify(address)}]`,
-      );
-    }
-    await promises.writeFile(file, content);
+  const file = join(cwd, "wrangler.jsonc");
+  const source = await promises.readFile(file, "utf8");
+  const config = JSON.parse(
+    source.replace(/,(\s*[}\]])/g, "$1"),
+  ) as EdgeWrangler;
+  if (
+    !config.vars ||
+    !config.send_email?.[0] ||
+    !config.d1_databases?.[0] ||
+    !config.kv_namespaces?.[0] ||
+    !config.r2_buckets?.[0] ||
+    !config.queues?.producers[0] ||
+    !config.queues.consumers[0]
+  ) {
+    throw new Error(
+      "Edge template changed: required Wrangler bindings missing.",
+    );
   }
+
+  config.name = project.name;
+  delete config.routes;
+  delete config.flagship;
+  delete config.ai;
+  config.vars.BETTER_AUTH_URL = "http://localhost:3000";
+  config.vars.VITE_URL = "http://localhost:3000";
+  config.vars.VITE_TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+  delete config.vars.VITE_CF_WEB_ANALYTICS_TOKEN;
+  for (const [key, value] of Object.entries(values)) {
+    if (!wranglerVarKeys.has(key) || value === undefined) continue;
+    config.vars[key] =
+      key === "VITE_AUTH_PASSWORD" || key === "VITE_AUTH_ANONYMOUS"
+        ? value === "true"
+        : value;
+  }
+
+  const sender =
+    values.EMAIL_FROM ?? `${project.projectName} <noreply@example.com>`;
+  config.send_email[0].allowed_sender_addresses = [
+    /<([^<>]+)>$/.exec(sender)?.[1] ?? sender,
+  ];
+  config.d1_databases[0].database_name = project.name;
+  config.d1_databases[0].database_id = "00000000-0000-0000-0000-000000000000";
+  config.kv_namespaces[0].id = "00000000000000000000000000000000";
+  config.r2_buckets[0].bucket_name = project.name;
+  config.queues.producers[0].queue = `${project.name}-jobs`;
+  config.queues.consumers[0].queue = `${project.name}-jobs`;
+
+  await promises.writeFile(file, `${JSON.stringify(config, null, 2)}\n`);
 };
 
 export const initializeEdgeProject = async (project: NewProject) => {
@@ -157,40 +183,6 @@ export const initializeEdgeProject = async (project: NewProject) => {
   );
 
   const projectDir = await cloneKit(project, "edge");
-  const starterConfig = await promises.readFile(
-    join(projectDir, "wrangler.starter.jsonc"),
-    "utf8",
-  );
-  if (!starterConfig.includes("__PROJECT_NAME__")) {
-    throw new Error(
-      "Edge starter config is missing its project-name placeholder.",
-    );
-  }
-  await promises.writeFile(
-    join(projectDir, "wrangler.jsonc"),
-    starterConfig
-      .replaceAll("__PROJECT_NAME__", project.name)
-      .replace(
-        `"VITE_PRODUCT_NAME": "${project.name}"`,
-        `"VITE_PRODUCT_NAME": ${JSON.stringify(project.projectName)}`,
-      ),
-  );
-  const localConfig = await promises.readFile(
-    join(projectDir, "wrangler.local.jsonc"),
-    "utf8",
-  );
-  if (!localConfig.includes('"name": "edge-local"')) {
-    throw new Error("Edge local config is missing its starter name.");
-  }
-  await promises.writeFile(
-    join(projectDir, "wrangler.local.jsonc"),
-    localConfig
-      .replaceAll("edge-local", project.name)
-      .replace(
-        '"VITE_PRODUCT_NAME": "TurboEdge"',
-        `"VITE_PRODUCT_NAME": ${JSON.stringify(project.projectName)}`,
-      ),
-  );
   await copyEnvExamples(projectDir, ["."]);
   await setEnvValue(projectDir, ".", "VITE_PRODUCT_NAME", project.projectName);
   await setEnvValue(projectDir, ".", "BETTER_AUTH_SECRET", createAuthSecret());
@@ -204,7 +196,7 @@ export const initializeEdgeProject = async (project: NewProject) => {
   const configured = configure
     ? await configureEnvGroups(projectDir, edgeGroups)
     : {};
-  await syncWranglerVars(projectDir, {
+  await configureWrangler(project, projectDir, {
     VITE_PRODUCT_NAME: project.projectName,
     CONTACT_EMAIL: "hello@example.com",
     EMAIL_FROM: `${project.projectName} <noreply@example.com>`,
@@ -214,7 +206,7 @@ export const initializeEdgeProject = async (project: NewProject) => {
   await installKitDependencies(projectDir);
   const spinner = ora("Preparing local D1 database...").start();
   try {
-    await execa("pnpm", ["db:migrate"], { cwd: projectDir });
+    await execa("pnpm", ["db:migrate", "--local"], { cwd: projectDir });
     spinner.succeed("Local D1 database ready!");
   } catch (error) {
     spinner.fail("Failed to prepare local D1 database.");
