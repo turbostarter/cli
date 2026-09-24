@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.9.0
+
+### Minor Changes
+
+- [#18](https://github.com/turbostarter/cli/pull/18) [`675e5b0`](https://github.com/turbostarter/cli/commit/675e5b096f4565ef71a56b9fa8a48a2d9a01f19b) Thanks [@Bartek532](https://github.com/Bartek532)! - Add AI Kit and Edge Kit project creation to the `new` command, with kit-specific local setup and upstream updates.
+
 ## 1.8.0
 
 ### Minor Changes
