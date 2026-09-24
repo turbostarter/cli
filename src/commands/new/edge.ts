@@ -1,4 +1,5 @@
 import { execa } from "execa";
+import { randomBytes, randomUUID } from "node:crypto";
 import { promises } from "node:fs";
 import { join } from "node:path";
 import ora from "ora";
@@ -103,9 +104,12 @@ const wranglerVarKeys = new Set([
 interface EdgeWrangler {
   name: string;
   vars: Record<string, string | boolean>;
+  routes: { pattern: string; custom_domain: boolean }[];
   send_email: { allowed_sender_addresses: string[] }[];
-  d1_databases: { database_name: string }[];
+  d1_databases: { database_name: string; database_id: string }[];
+  kv_namespaces: { id: string }[];
   r2_buckets: { bucket_name: string }[];
+  flagship: { app_id: string }[];
   queues: {
     producers: { queue: string }[];
     consumers: { queue: string }[];
@@ -118,12 +122,16 @@ const configureWrangler = async (
   values: Record<string, string>,
 ) => {
   const file = join(cwd, "wrangler.jsonc");
-  await promises.copyFile(join(cwd, "wrangler.example.jsonc"), file);
   const source = await promises.readFile(file, "utf8");
   const config = JSON.parse(
     source.replace(/,(\s*[}\]])/g, "$1"),
   ) as EdgeWrangler;
   config.name = project.name;
+  config.vars.BETTER_AUTH_URL = "http://localhost:3000";
+  config.vars.VITE_URL = "http://localhost:3000";
+  config.vars.VITE_TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+  config.vars.VITE_CF_WEB_ANALYTICS_TOKEN = "";
+  config.routes = [];
   for (const [key, value] of Object.entries(values)) {
     if (!wranglerVarKeys.has(key)) continue;
     config.vars[key] =
@@ -137,7 +145,10 @@ const configureWrangler = async (
     /<([^<>]+)>$/.exec(sender)?.[1] ?? sender,
   ];
   config.d1_databases[0].database_name = project.name;
+  config.d1_databases[0].database_id = randomUUID();
+  config.kv_namespaces[0].id = randomBytes(16).toString("hex");
   config.r2_buckets[0].bucket_name = project.name;
+  config.flagship[0].app_id = randomUUID();
   config.queues.producers[0].queue = `${project.name}-jobs`;
   config.queues.consumers[0].queue = `${project.name}-jobs`;
 

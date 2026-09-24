@@ -88,7 +88,7 @@ export const newCommand = new Command()
         logger.info("AI features need the provider keys you choose to use.");
       if (kit === "edge")
         logger.info(
-          "Cloudflare AI, Flagship, email delivery, and deployment need cloud configuration later.",
+          "Edge keeps all service bindings. pnpm dev needs Cloudflare credentials and your own Flagship app ID because AI and Flagship use remote bindings.",
         );
       logger.info(`Problems? ${color.underline(kits[kit].docs)}`);
       if (kit === "core") await logAddOnUpsell("new_success");
