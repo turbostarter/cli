@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.9.1
+
+### Patch Changes
+
+- [#25](https://github.com/turbostarter/cli/pull/25) [`8c28ef3`](https://github.com/turbostarter/cli/commit/8c28ef3f5aa71b3cd2a86ed72d9c7125e7583875) Thanks [@Bartek532](https://github.com/Bartek532)! - Correct the published license metadata and package entry point.
+
 ## 1.9.0
 
 ### Minor Changes
