@@ -68,7 +68,7 @@ export const cloneKit = async (project: NewProject, kit: Kit) => {
   } catch (error) {
     spinner.fail(`Failed to clone ${config.products[kit].label}.`);
     logger.info(
-      `Need access to ${config.products[kit].label}? ${color.underline(config.products[kit].url)}`,
+      `Want to try ${config.products[kit].label}? Check out at ${color.underline(config.products[kit].url)}`,
     );
     throw error;
   }
@@ -146,7 +146,7 @@ export const setEnvironmentVariablesInPaths = async (
       (key) => !mappedKeys.has(key),
     );
     if (unmappedKeys.length > 0) {
-      throw new Error(
+      logger.info(
         `No environment file path configured for: ${unmappedKeys.join(", ")}`,
       );
     }
