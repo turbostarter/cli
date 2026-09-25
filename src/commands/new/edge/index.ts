@@ -37,13 +37,19 @@ export const initializeEdgeProject = async (project: NewProject) => {
     await setEnvironmentVariablesInPaths(projectDir, config.env, envInPaths);
   }
 
-  await configureWrangler(project, projectDir, {
+  const wranglerConfigured = await configureWrangler(project, projectDir, {
     [edgeEnv.productName]: project.projectName,
     [edgeEnv.contactEmail]: "hello@example.com",
     [edgeEnv.emailFrom]: `noreply@example.com`,
     ...(config?.env ?? {}),
   });
   await installDependencies(projectDir);
-  await prepareLocalD1(projectDir);
+  if (wranglerConfigured) {
+    await prepareLocalD1(projectDir);
+  } else {
+    logger.info(
+      "Local D1 setup skipped. Review wrangler.jsonc, then run pnpm db:setup in your project.",
+    );
+  }
   await configureGit(projectDir);
 };
