@@ -50,7 +50,7 @@ const getBillingMobileProviderConfig = async (
               ],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.MOBILE].revenuecat.webhookSecret,
             message: "Enter your RevenueCat webhook secret",
             initial:
@@ -59,7 +59,7 @@ const getBillingMobileProviderConfig = async (
               ],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.MOBILE].revenuecat.apiKey,
             message: "Enter your RevenueCat API key",
             initial:
@@ -86,7 +86,7 @@ const getBillingMobileProviderConfig = async (
               configuredEnv[coreEnv.billing[App.MOBILE].superwall.googleApiKey],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.MOBILE].superwall.webhookSecret,
             message: "Enter your Superwall webhook secret",
             initial:

@@ -186,7 +186,7 @@ export const configureEnvGroups = async (groups: EnvPromptGroup[]) => {
     for (const entry of group.entries) {
       const answer = await prompts(
         {
-          type: "text",
+          type: entry.secret ? "password" : "text",
           name: "value",
           message: entry.label,
           validate: (value: string) =>

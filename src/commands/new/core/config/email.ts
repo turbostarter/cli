@@ -34,7 +34,7 @@ const getEmailProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.email.resend.apiKey,
             message: "Enter your Resend API key",
             initial: configuredEnv[coreEnv.email.resend.apiKey],
@@ -48,7 +48,7 @@ const getEmailProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.email.sendgrid.apiKey,
             message: "Enter your Sendgrid API key",
             initial: configuredEnv[coreEnv.email.sendgrid.apiKey],
@@ -62,7 +62,7 @@ const getEmailProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.email.plunk.apiKey,
             message: "Enter your Plunk API key",
             initial: configuredEnv[coreEnv.email.plunk.apiKey],
@@ -76,7 +76,7 @@ const getEmailProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.email.postmark.apiKey,
             message: "Enter your Postmark API key",
             initial: configuredEnv[coreEnv.email.postmark.apiKey],
@@ -90,7 +90,7 @@ const getEmailProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.email.mailgun.apiKey,
             message: "Enter your Mailgun API key",
             initial: configuredEnv[coreEnv.email.mailgun.apiKey],
@@ -124,7 +124,7 @@ const getEmailProviderConfig = async (
             initial: configuredEnv[coreEnv.email.nodemailer.user],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.email.nodemailer.password,
             message: "Enter your Nodemailer user password",
             initial: configuredEnv[coreEnv.email.nodemailer.password],

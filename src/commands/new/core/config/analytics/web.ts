@@ -43,7 +43,7 @@ const getAnalyticsWebProviderConfig = async (
               ],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.analytics[App.WEB]["google-analytics"].secret,
             message: "Enter your Google Analytics secret",
             initial:
@@ -77,7 +77,7 @@ const getAnalyticsWebProviderConfig = async (
               configuredEnv[coreEnv.analytics[App.WEB]["open-panel"].clientId],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.analytics[App.WEB]["open-panel"].secret,
             message: "Enter your OpenPanel secret",
             initial:
@@ -152,7 +152,7 @@ const getAnalyticsWebProviderConfig = async (
               "https://api-gateway.umami.dev",
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.analytics[App.WEB].umami.apiKey,
             message: "Enter your Umami API key",
             initial: configuredEnv[coreEnv.analytics[App.WEB].umami.apiKey],

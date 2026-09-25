@@ -39,13 +39,13 @@ const getBillingWebProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB].stripe.secretKey,
             message: "Enter your Stripe secret key",
             initial: configuredEnv[coreEnv.billing[App.WEB].stripe.secretKey],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB].stripe.webhookSecret,
             message: "Enter your Stripe webhook secret",
             initial:
@@ -65,14 +65,14 @@ const getBillingWebProviderConfig = async (
               configuredEnv[coreEnv.billing[App.WEB]["lemon-squeezy"].storeId],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB]["lemon-squeezy"].apiKey,
             message: "Enter your Lemon Squeezy API key",
             initial:
               configuredEnv[coreEnv.billing[App.WEB]["lemon-squeezy"].apiKey],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB]["lemon-squeezy"].signingSecret,
             message: "Enter your Lemon Squeezy signing secret",
             initial:
@@ -87,13 +87,13 @@ const getBillingWebProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB].polar.accessToken,
             message: "Enter your Polar access token",
             initial: configuredEnv[coreEnv.billing[App.WEB].polar.accessToken],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB].polar.webhookSecret,
             message: "Enter your Polar webhook secret",
             initial:
@@ -113,14 +113,14 @@ const getBillingWebProviderConfig = async (
       return prompts(
         [
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB]["dodo-payments"].apiKey,
             message: "Enter your Dodo Payments API key",
             initial:
               configuredEnv[coreEnv.billing[App.WEB]["dodo-payments"].apiKey],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.billing[App.WEB]["dodo-payments"].webhookKey,
             message: "Enter your Dodo Payments webhook key",
             initial:

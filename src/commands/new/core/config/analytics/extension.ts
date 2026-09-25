@@ -47,7 +47,7 @@ const getAnalyticsExtensionProviderConfig = async (
               ],
           },
           {
-            type: "text",
+            type: "password",
             name: coreEnv.analytics[App.EXTENSION]["google-analytics"].secret,
             message: "Enter your Google Analytics secret",
             initial:

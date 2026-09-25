@@ -50,13 +50,13 @@ const getStorageProviderConfig = (configuredEnv: Record<string, string>) => {
         initial: configuredEnv[coreEnv.storage.s3.bucket],
       },
       {
-        type: "text",
+        type: "password",
         name: coreEnv.storage.s3.accessKeyId,
         message: "Enter your S3 access key ID",
         initial: configuredEnv[coreEnv.storage.s3.accessKeyId],
       },
       {
-        type: "text",
+        type: "password",
         name: coreEnv.storage.s3.secretAccessKey,
         message: "Enter your S3 secret access key",
         initial: configuredEnv[coreEnv.storage.s3.secretAccessKey],

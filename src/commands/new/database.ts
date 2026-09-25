@@ -20,7 +20,7 @@ const getDatabaseCloudConfig = async (
   const answer = await prompts(
     [
       {
-        type: "text",
+        type: "password",
         name: key,
         message: "Enter your database URL",
         initial: configuredEnv[key],
