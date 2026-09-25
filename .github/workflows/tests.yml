@@ -27,6 +27,8 @@ jobs:
             run: pnpm run lint
           - name: 📝 Typecheck
             run: pnpm run typecheck
+          - name: 🧪 Bootstrap tests
+            run: pnpm run test
     steps:
       - name: ✅ Checkout code
         uses: actions/checkout@v6
