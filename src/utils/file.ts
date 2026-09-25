@@ -3,8 +3,6 @@ import _ from "lodash";
 import { join } from "path";
 import { Project } from "ts-morph";
 
-import { enforceSchema } from "~/utils";
-
 import type { SourceFile } from "ts-morph";
 import type { z } from "zod";
 
@@ -98,10 +96,20 @@ export const applyFileModifications = async (cwd: string, files: Entry[]) => {
     } else if (isJsonFile(file)) {
       const path = join(cwd, file.path);
       const parsed: unknown = JSON.parse(await promises.readFile(path, "utf8"));
-      if (!enforceSchema(parsed, file.schema)) continue;
+      const result = file.schema.safeParse(parsed);
+      if (!result.success) {
+        const issues = result.error.issues
+          .map(
+            (issue) => `${issue.path.join(".") || "<root>"}: ${issue.message}`,
+          )
+          .join("; ");
+        throw new Error(
+          `Cannot modify ${file.path}: template JSON does not match the expected shape (${issues}).`,
+        );
+      }
       await promises.writeFile(
         path,
-        JSON.stringify(file.modify(parsed), null, 2),
+        JSON.stringify(file.modify(result.data), null, 2),
       );
     } else if (isTypescriptFile(file)) {
       const source = project.addSourceFileAtPath(join(cwd, file.path));
