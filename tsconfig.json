@@ -21,6 +21,6 @@
       "~/*": ["./src/*"]
     }
   },
-  "include": ["*.ts", "src", "test"],
+  "include": ["*.ts", "src", "tests"],
   "exclude": ["node_modules"]
 }

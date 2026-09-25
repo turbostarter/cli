@@ -31,7 +31,7 @@
     "start": "node dist/index.mjs",
     "dev": "tsdown --watch",
     "build": "tsdown",
-    "test": "tsdown test/wrangler.test.ts --no-config --out-dir .test-dist && node --test .test-dist/wrangler.test.mjs",
+    "test": "tsdown --config tsdown.test.config.ts && node --test .test-dist/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
