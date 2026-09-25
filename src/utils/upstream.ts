@@ -16,7 +16,7 @@ export async function hasSshAccess(): Promise<boolean> {
         "-T",
         "git@github.com",
         "-o",
-        "StrictHostKeyChecking=no",
+        "StrictHostKeyChecking=yes",
         "-o",
         "BatchMode=yes",
       ],
