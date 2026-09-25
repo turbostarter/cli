@@ -7,6 +7,9 @@ import { test } from "node:test";
 import { removeMobile } from "~/commands/new/ai/mobile";
 import { modifyFilesForMissingApps } from "~/commands/new/core/apps";
 import { App } from "~/commands/new/core/config/definitions";
+import { fileModificationsByMissingApp } from "~/commands/new/core/config/file-modifications";
+import { applyFileModifications } from "~/utils/file";
+import { logger } from "~/utils/logger";
 
 const withFixture = async (run: (cwd: string) => Promise<void>) => {
   const cwd = await fs.mkdtemp(join(tmpdir(), "turbostarter-bootstrap-"));
@@ -183,20 +186,45 @@ void test("AI without mobile removes Expo integration and keeps web auth", () =>
     assert.match(server, /otherPlugin\(\)|https:\/\/example.com/);
   }));
 
-void test("template schema drift reports the file and missing field", () =>
+void test("template schema drift logs the skipped file and continues", () =>
   withFixture(async (cwd) => {
-    await write(cwd, "pnpm-workspace.yaml", "packages:\n  - apps/*\n");
     await write(
       cwd,
       "packages/api/package.json",
       JSON.stringify({ name: "api" }),
     );
+    await write(
+      cwd,
+      "packages/auth/package.json",
+      JSON.stringify({
+        dependencies: { "@better-auth/expo": "1.0.0", "better-auth": "1.0.0" },
+      }),
+    );
 
-    await assert.rejects(
-      modifyFilesForMissingApps(cwd, [App.WEB, App.EXTENSION]),
-      /Cannot modify packages\/api\/package\.json:.*dependencies/,
+    const logs: string[] = [];
+    const originalInfo = logger.info.bind(logger);
+    logger.info = (message) => logs.push(String(message));
+    try {
+      await applyFileModifications(
+        cwd,
+        fileModificationsByMissingApp[App.MOBILE].filter((entry) =>
+          entry.path.endsWith("/package.json"),
+        ),
+      );
+    } finally {
+      logger.info = originalInfo;
+    }
+
+    assert.ok(
+      logs.some((message) =>
+        /Skipping packages\/api\/package\.json:.*dependencies/.test(message),
+      ),
     );
     assert.deepEqual(JSON.parse(await read(cwd, "packages/api/package.json")), {
       name: "api",
     });
+    const auth = JSON.parse(await read(cwd, "packages/auth/package.json")) as {
+      dependencies: Record<string, string>;
+    };
+    assert.deepEqual(auth.dependencies, { "better-auth": "1.0.0" });
   }));

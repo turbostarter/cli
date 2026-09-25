@@ -3,6 +3,8 @@ import _ from "lodash";
 import { join } from "path";
 import { Project } from "ts-morph";
 
+import { logger } from "~/utils/logger";
+
 import type { SourceFile } from "ts-morph";
 import type { z } from "zod";
 
@@ -103,9 +105,10 @@ export const applyFileModifications = async (cwd: string, files: Entry[]) => {
             (issue) => `${issue.path.join(".") || "<root>"}: ${issue.message}`,
           )
           .join("; ");
-        throw new Error(
-          `Cannot modify ${file.path}: template JSON does not match the expected shape (${issues}).`,
+        logger.info(
+          `Skipping ${file.path}: template JSON does not match the expected shape (${issues}). Review this file after setup.`,
         );
+        continue;
       }
       await promises.writeFile(
         path,
