@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import { configureWrangler } from "../src/commands/new/edge/wrangler";
+import { logger } from "../src/utils/logger";
 
 import type { ParseError } from "jsonc-parser";
 
@@ -35,16 +36,28 @@ const wrangler = `{
 }
 `;
 
+const captureInfo = async (run: () => Promise<boolean>) => {
+  const messages: string[] = [];
+  const originalInfo = logger.info.bind(logger);
+  logger.info = (message) => messages.push(String(message));
+  try {
+    return { configured: await run(), messages };
+  } finally {
+    logger.info = originalInfo;
+  }
+};
+
 void test("configures commented Wrangler JSONC while preserving comments and existing values", async (t) => {
   const cwd = await fs.mkdtemp(join(tmpdir(), "wrangler-jsonc-"));
   t.after(() => fs.rm(cwd, { recursive: true, force: true }));
   await fs.writeFile(join(cwd, "wrangler.jsonc"), wrangler);
 
-  await configureWrangler(project, cwd, {
+  const configured = await configureWrangler(project, cwd, {
     EMAIL_FROM: "TurboStarter <noreply@example.com>",
     VITE_PRODUCT_NAME: "Example App",
     VITE_AUTH_PASSWORD: "true",
   });
+  assert.equal(configured, true);
 
   const updated = await fs.readFile(join(cwd, "wrangler.jsonc"), "utf8");
   assert.match(updated, /\/\/ Keep this deployment note\./);
@@ -79,16 +92,39 @@ void test("configures commented Wrangler JSONC while preserving comments and exi
   assert.equal(config.queues.consumers[0].queue, "example-app-jobs");
 });
 
-void test("rejects invalid JSONC without replacing the file", async (t) => {
+void test("logs invalid JSONC and continues without changing the file", async (t) => {
   const cwd = await fs.mkdtemp(join(tmpdir(), "wrangler-jsonc-"));
   t.after(() => fs.rm(cwd, { recursive: true, force: true }));
   const path = join(cwd, "wrangler.jsonc");
   const invalid = '{ "name": "template", /* unfinished';
   await fs.writeFile(path, invalid);
 
-  await assert.rejects(
+  const { configured, messages } = await captureInfo(() =>
     configureWrangler(project, cwd, {}),
-    /Invalid wrangler\.jsonc/,
+  );
+  assert.equal(configured, false);
+  assert.ok(
+    messages.some((message) => message.includes("invalid JSONC at offset")),
   );
   assert.equal(await fs.readFile(path, "utf8"), invalid);
+});
+
+void test("logs changed Wrangler shape and continues without changing the file", async (t) => {
+  const cwd = await fs.mkdtemp(join(tmpdir(), "wrangler-jsonc-"));
+  t.after(() => fs.rm(cwd, { recursive: true, force: true }));
+  const path = join(cwd, "wrangler.jsonc");
+  const changed = wrangler.replace(
+    '"flagship": [{ "app_id": "old-id" }],',
+    '"flagship": [],',
+  );
+  await fs.writeFile(path, changed);
+
+  const { configured, messages } = await captureInfo(() =>
+    configureWrangler(project, cwd, {}),
+  );
+  assert.equal(configured, false);
+  assert.ok(
+    messages.some((message) => /expected shape.*flagship/.test(message)),
+  );
+  assert.equal(await fs.readFile(path, "utf8"), changed);
 });

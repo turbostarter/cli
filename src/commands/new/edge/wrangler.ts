@@ -4,6 +4,7 @@ import * as z from "zod";
 
 import { edgeEnv } from "~/commands/new/edge/config";
 import { modifyTextFile } from "~/utils/file";
+import { logger } from "~/utils/logger";
 
 import type { NewProject } from "../common";
 import type { JSONPath, ParseError } from "jsonc-parser";
@@ -117,6 +118,7 @@ export const configureWrangler = async (
   cwd: string,
   values: Record<string, string>,
 ) => {
+  let configured = false;
   await modifyTextFile({
     cwd,
     path: "wrangler.jsonc",
@@ -127,12 +129,26 @@ export const configureWrangler = async (
       });
       if (errors.length > 0) {
         const error = errors[0];
-        throw new Error(
-          `Invalid wrangler.jsonc at offset ${error.offset}: ${printParseErrorCode(error.error)}`,
+        logger.info(
+          `Skipping wrangler.jsonc configuration: invalid JSONC at offset ${error.offset} (${printParseErrorCode(error.error)}). Review this file after setup.`,
         );
+        return source;
       }
 
-      const original = wranglerSchema.parse(parsed);
+      const result = wranglerSchema.safeParse(parsed);
+      if (!result.success) {
+        const issues = result.error.issues
+          .map(
+            (issue) => `${issue.path.join(".") || "<root>"}: ${issue.message}`,
+          )
+          .join("; ");
+        logger.info(
+          `Skipping wrangler.jsonc configuration: template JSONC does not match the expected shape (${issues}). Review this file after setup.`,
+        );
+        return source;
+      }
+
+      const original = result.data;
       const config = structuredClone(original);
       config.name = project.name;
       setWranglerVars(config, values);
@@ -145,11 +161,14 @@ export const configureWrangler = async (
         tabSize: indent.includes("\t") ? 1 : indent.length,
       };
 
-      return changedValues(original, config).reduce(
+      const updated = changedValues(original, config).reduce(
         (text, { path, value }) =>
           applyEdits(text, modify(text, path, value, { formattingOptions })),
         source,
       );
+      configured = true;
+      return updated;
     },
   });
+  return configured;
 };
