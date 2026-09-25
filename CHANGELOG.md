@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.9.2
+
+### Patch Changes
+
+- [#24](https://github.com/turbostarter/cli/pull/24) [`c2b20b4`](https://github.com/turbostarter/cli/commit/c2b20b4f7db256ca42b2a140f05d65da6ab057e3) Thanks [@Bartek532](https://github.com/Bartek532)! - Improve project setup by writing all configured Core provider environment values, reporting template JSON shape drift without stopping bootstrap, and preserving comments when updating Edge Wrangler JSONC.
+
 ## 1.9.1
 
 ### Patch Changes
