@@ -1,3 +1,4 @@
+import { applyEdits, modify, parse, printParseErrorCode } from "jsonc-parser";
 import { randomBytes, randomUUID } from "node:crypto";
 import * as z from "zod";
 
@@ -5,6 +6,7 @@ import { edgeEnv } from "~/commands/new/edge/config";
 import { modifyTextFile } from "~/utils/file";
 
 import type { NewProject } from "../common";
+import type { JSONPath, ParseError } from "jsonc-parser";
 
 const wranglerVarKeys = new Set([
   edgeEnv.productName,
@@ -38,6 +40,42 @@ const wranglerSchema = z.looseObject({
 });
 
 type EdgeWrangler = z.infer<typeof wranglerSchema>;
+
+interface Change {
+  path: JSONPath;
+  value: unknown;
+}
+
+const changedValues = (
+  before: unknown,
+  after: unknown,
+  path: JSONPath = [],
+): Change[] => {
+  if (Object.is(before, after)) return [];
+
+  if (Array.isArray(before) && Array.isArray(after)) {
+    if (before.length !== after.length) return [{ path, value: after }];
+    return after.flatMap((value, index) =>
+      changedValues(before[index], value, [...path, index]),
+    );
+  }
+
+  if (
+    before !== null &&
+    after !== null &&
+    typeof before === "object" &&
+    typeof after === "object" &&
+    !Array.isArray(before) &&
+    !Array.isArray(after)
+  ) {
+    const oldValues = before as Record<string, unknown>;
+    return Object.entries(after).flatMap(([key, value]) =>
+      changedValues(oldValues[key], value, [...path, key]),
+    );
+  }
+
+  return [{ path, value: after }];
+};
 
 const setWranglerVars = (
   config: EdgeWrangler,
@@ -83,14 +121,35 @@ export const configureWrangler = async (
     cwd,
     path: "wrangler.jsonc",
     modify: (source) => {
-      const config = wranglerSchema.parse(
-        JSON.parse(source.replace(/,(\s*[}\]])/g, "$1")),
-      );
+      const errors: ParseError[] = [];
+      const parsed: unknown = parse(source, errors, {
+        allowTrailingComma: true,
+      });
+      if (errors.length > 0) {
+        const error = errors[0];
+        throw new Error(
+          `Invalid wrangler.jsonc at offset ${error.offset}: ${printParseErrorCode(error.error)}`,
+        );
+      }
+
+      const original = wranglerSchema.parse(parsed);
+      const config = structuredClone(original);
       config.name = project.name;
       setWranglerVars(config, values);
       setWranglerBindings(config, project, values[edgeEnv.emailFrom]);
 
-      return `${JSON.stringify(config, null, 2)}\n`;
+      const indent = /(?:^|\r?\n)([ \t]+)"/.exec(source)?.[1] ?? "  ";
+      const formattingOptions = {
+        eol: source.includes("\r\n") ? "\r\n" : "\n",
+        insertSpaces: !indent.includes("\t"),
+        tabSize: indent.includes("\t") ? 1 : indent.length,
+      };
+
+      return changedValues(original, config).reduce(
+        (text, { path, value }) =>
+          applyEdits(text, modify(text, path, value, { formattingOptions })),
+        source,
+      );
     },
   });
 };

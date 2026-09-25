@@ -31,6 +31,7 @@
     "start": "node dist/index.mjs",
     "dev": "tsdown --watch",
     "build": "tsdown",
+    "test": "tsdown test/wrangler.test.ts --no-config --out-dir .test-dist && node --test .test-dist/wrangler.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -59,6 +60,7 @@
   "dependencies": {
     "commander": "15.0.0",
     "execa": "9.6.1",
+    "jsonc-parser": "3.3.1",
     "lodash": "4.18.1",
     "ora": "9.4.1",
     "picocolors": "1.1.1",
