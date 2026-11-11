@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.10.0
+
+### Minor Changes
+
+- [#28](https://github.com/turbostarter/cli/pull/28) [`c27be05`](https://github.com/turbostarter/cli/commit/c27be059b32c6190f316052ad3d0c96e978e718b) Thanks [@Bartek532](https://github.com/Bartek532)! - Let AI Kit projects choose their chat model gateway (Vercel AI Gateway, Neon AI Gateway or OpenRouter), prompt only for that gateway's credentials and switch the gateway exports in the generated project.
+
 ## 1.9.2
 
 ### Patch Changes
