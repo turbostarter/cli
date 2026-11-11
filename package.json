@@ -1,6 +1,6 @@
 {
   "name": "@turbostarter/cli",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "main": "./dist/index.mjs",
   "type": "module",
   "exports": "./dist/index.mjs",
