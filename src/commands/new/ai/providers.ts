@@ -1,22 +1,75 @@
 import color from "picocolors";
+import prompts from "prompts";
 
-import { aiEnv } from "~/commands/new/ai/config";
+import {
+  aiEnv,
+  GatewayProvider,
+  gatewayLabels,
+} from "~/commands/new/ai/config";
 import { getDatabaseConfig } from "~/commands/new/database";
-import { logger } from "~/utils";
+import { logger, onCancel } from "~/utils";
 
 import { configureEnvGroups } from "../common";
 
-const groups = [
-  {
-    title: "AI Gateway",
+import type { EnvPromptGroup } from "../common";
+
+const gatewayGroups = {
+  [GatewayProvider.VERCEL]: {
+    title: gatewayLabels[GatewayProvider.VERCEL],
     entries: [
       {
-        key: aiEnv.providers.gateway.apiKey,
+        key: aiEnv.providers.vercel.apiKey,
         label: "AI Gateway API key",
         secret: true,
       },
     ],
   },
+  [GatewayProvider.NEON]: {
+    title: gatewayLabels[GatewayProvider.NEON],
+    entries: [
+      {
+        key: aiEnv.providers.neon.baseUrl,
+        label: "Neon AI Gateway base URL",
+      },
+      {
+        key: aiEnv.providers.neon.token,
+        label: "Neon AI Gateway token",
+        secret: true,
+      },
+    ],
+  },
+  [GatewayProvider.OPENROUTER]: {
+    title: gatewayLabels[GatewayProvider.OPENROUTER],
+    entries: [
+      {
+        key: aiEnv.providers.openrouter.apiKey,
+        label: "OpenRouter API key",
+        secret: true,
+      },
+    ],
+  },
+} as const satisfies Record<GatewayProvider, EnvPromptGroup>;
+
+const getGatewayProvider = async (): Promise<{
+  provider: GatewayProvider;
+}> => {
+  return prompts(
+    [
+      {
+        type: "select",
+        choices: Object.values(GatewayProvider).map((provider) => ({
+          title: gatewayLabels[provider],
+          value: provider,
+        })),
+        name: "provider",
+        message: "What do you want to use as the chat model gateway?",
+      },
+    ],
+    { onCancel },
+  );
+};
+
+const groups: EnvPromptGroup[] = [
   {
     title: "other model providers",
     entries: [
@@ -84,11 +137,13 @@ export const configureProviders = async () => {
   );
 
   const db = await getDatabaseConfig({});
+  const { provider: gateway } = await getGatewayProvider();
   return {
     db,
+    gateway,
     env: {
       ...db.env,
-      ...(await configureEnvGroups(groups)),
+      ...(await configureEnvGroups([gatewayGroups[gateway], ...groups])),
     },
   };
 };
