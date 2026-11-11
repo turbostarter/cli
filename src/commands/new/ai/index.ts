@@ -1,9 +1,10 @@
 import { join } from "node:path";
 import color from "picocolors";
 
-import { envInPaths } from "~/commands/new/ai/config";
+import { envInPaths, gatewayConfigFiles } from "~/commands/new/ai/config";
 import { Kit, Service, ServiceType } from "~/config";
 import { logger } from "~/utils";
+import { replaceInFiles } from "~/utils/file";
 
 import {
   cloneKit,
@@ -38,6 +39,12 @@ export const initializeAiProject = async (project: NewProject) => {
   await prepareEnvironment(project, projectDir, mobile);
   if (config) {
     await setEnvironmentVariablesInPaths(projectDir, config.env, envInPaths);
+    await replaceInFiles({
+      cwd: projectDir,
+      paths: gatewayConfigFiles.files,
+      pattern: gatewayConfigFiles.pattern,
+      value: config.gateway,
+    });
   }
 
   await installDependencies(projectDir);

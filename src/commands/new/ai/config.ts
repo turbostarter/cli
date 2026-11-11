@@ -8,14 +8,45 @@ export const EnvPath = {
 
 export type EnvPath = (typeof EnvPath)[keyof typeof EnvPath];
 
+export const GatewayProvider = {
+  VERCEL: "vercel",
+  NEON: "neon",
+  OPENROUTER: "openrouter",
+} as const;
+
+export type GatewayProvider =
+  (typeof GatewayProvider)[keyof typeof GatewayProvider];
+
+export const gatewayLabels = {
+  [GatewayProvider.VERCEL]: "Vercel AI Gateway",
+  [GatewayProvider.NEON]: "Neon AI Gateway",
+  [GatewayProvider.OPENROUTER]: "OpenRouter",
+} as const satisfies Record<GatewayProvider, string>;
+
+export const gatewayConfigFiles = {
+  files: [
+    "packages/ai/chat/src/models/gateway/index.ts",
+    "packages/ai/chat/src/models/gateway/server.ts",
+    "packages/ai/chat/src/models/gateway/env.ts",
+  ],
+  pattern: new RegExp(`(${Object.values(GatewayProvider).join("|")})`, "gi"),
+};
+
 export const aiEnv = {
   productName: "PRODUCT_NAME",
   [Service.DB]: {
     url: "DATABASE_URL",
   },
   providers: {
-    gateway: {
+    [GatewayProvider.VERCEL]: {
       apiKey: "AI_GATEWAY_API_KEY",
+    },
+    [GatewayProvider.NEON]: {
+      baseUrl: "NEON_AI_GATEWAY_BASE_URL",
+      token: "NEON_AI_GATEWAY_TOKEN",
+    },
+    [GatewayProvider.OPENROUTER]: {
+      apiKey: "OPENROUTER_API_KEY",
     },
     openai: {
       apiKey: "OPENAI_API_KEY",
@@ -74,7 +105,10 @@ export const aiEnv = {
 export const envInPaths = {
   [EnvPath.ROOT]: [aiEnv.productName, aiEnv[Service.DB].url],
   [EnvPath.WEB]: [
-    aiEnv.providers.gateway.apiKey,
+    aiEnv.providers.vercel.apiKey,
+    aiEnv.providers.neon.baseUrl,
+    aiEnv.providers.neon.token,
+    aiEnv.providers.openrouter.apiKey,
     aiEnv.providers.openai.apiKey,
     aiEnv.providers.anthropic.apiKey,
     aiEnv.providers.google.apiKey,
