@@ -1,5 +1,11 @@
 # @turbostarter/cli
 
+## 1.10.1
+
+### Patch Changes
+
+- [#30](https://github.com/turbostarter/cli/pull/30) [`e62d945`](https://github.com/turbostarter/cli/commit/e62d9455e3f8dc4b7fbfd8c6934cc6d9254912b3) Thanks [@Bartek532](https://github.com/Bartek532)! - Run service setup with `turbo run setup` so newer turbo versions don't treat `setup` as a built-in command that rejects `--filter`
+
 ## 1.10.0
 
 ### Minor Changes
