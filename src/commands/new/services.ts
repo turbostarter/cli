@@ -22,6 +22,7 @@ export const startServices = async (cwd: string, services: Service[]) => {
         "with-env",
         "pnpm",
         "turbo",
+        "run",
         "setup",
         ...services.map((service) => `--filter=${servicesPackages[service]}`),
       ],
